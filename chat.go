@@ -224,9 +224,15 @@ const (
 	ToolTypeFunction ToolType = "function"
 )
 
+type RetrievalDefinition struct {
+	KnowledgeId    string `json:"knowledge_id"`
+	PromptTemplate string `json:"prompt_template"`
+}
+
 type Tool struct {
-	Type     ToolType            `json:"type"`
-	Function *FunctionDefinition `json:"function,omitempty"`
+	Type      ToolType             `json:"type"`
+	Function  *FunctionDefinition  `json:"function,omitempty"`
+	Retrieval *RetrievalDefinition `json:"retrieval,omitempty"`
 }
 
 type ToolChoice struct {

@@ -4,18 +4,22 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/patrickmn/go-cache"
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	utils "github.com/sashabaranov/go-openai/internal"
 )
 
 // Client is OpenAI GPT-3 API client.
 type Client struct {
-	config ClientConfig
-
+	config            ClientConfig
+	cache             *cache.Cache
 	requestBuilder    utils.RequestBuilder
 	createFormBuilder func(io.Writer) utils.FormBuilder
 }
@@ -41,12 +45,17 @@ func (h *httpHeader) GetRateLimitHeaders() RateLimitHeaders {
 // NewClient creates new OpenAI API client.
 func NewClient(authToken string) *Client {
 	config := DefaultConfig(authToken)
+
 	return NewClientWithConfig(config)
 }
 
 // NewClientWithConfig creates new OpenAI API client for specified config.
 func NewClientWithConfig(config ClientConfig) *Client {
+	cacheClient := cache.New(
+		time.Duration(CacheTTLSeconds)*time.Second,
+		time.Duration(CacheTTLSeconds)*time.Second)
 	return &Client{
+		cache:          cacheClient,
 		config:         config,
 		requestBuilder: utils.NewRequestBuilder(),
 		createFormBuilder: func(body io.Writer) utils.FormBuilder {
@@ -170,17 +179,63 @@ func sendRequestStream[T streamable](client *Client, req *http.Request) (*stream
 	}, nil
 }
 
-func (c *Client) setCommonHeaders(req *http.Request) {
-	// https://learn.microsoft.com/en-us/azure/cognitive-services/openai/reference#authentication
-	// Azure API Key authentication
-	if c.config.APIType == APITypeAzure {
-		req.Header.Set(AzureAPIKeyHeader, c.config.authToken)
-	} else if c.config.authToken != "" {
-		// OpenAI or Azure AD authentication
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.config.authToken))
+const (
+	APITokenTTLSeconds = 3 * 60
+	CacheTTLSeconds    = APITokenTTLSeconds - 30
+)
+
+type CustomClaims struct {
+	ApiKey    string `json:"api_key"`
+	Timestamp int64  `json:"timestamp"`
+	jwt.StandardClaims
+}
+
+func (c *Client) generateToken(apiKey string) (string, error) {
+	apiKeys := strings.Split(apiKey, ".")
+	if len(apiKeys) <= 1 {
+		return "", errors.New("invalid api key")
 	}
-	if c.config.OrgID != "" {
-		req.Header.Set("OpenAI-Organization", c.config.OrgID)
+	key, secret := apiKeys[0], apiKeys[1]
+	curTime := time.Now().UnixNano() / 1e6
+	claims := &CustomClaims{
+		ApiKey:         key,
+		Timestamp:      curTime,
+		StandardClaims: jwt.StandardClaims{ExpiresAt: curTime + APITokenTTLSeconds*1000},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token.Header = map[string]interface{}{
+		"alg":       "HS256",
+		"sign_type": "SIGN",
+	}
+	return token.SignedString([]byte(secret))
+}
+
+func (c *Client) getToken() (string, error) {
+	// 获取缓存信息
+	cacheData, exist := c.cache.Get(c.config.authToken)
+	if exist {
+		token := cacheData.(string)
+		return token, nil
+	}
+
+	// 缓存信息不存在，则调用接口获取
+	token, err := c.generateToken(c.config.authToken)
+	if err != nil {
+		return "", errors.New("generate token error")
+	}
+
+	cacheDuration := CacheTTLSeconds
+	c.cache.Set(c.config.authToken, token, time.Duration(cacheDuration)*time.Second)
+	return token, nil
+}
+
+func (c *Client) setCommonHeaders(req *http.Request) {
+	if c.config.authToken != "" {
+		token, err := c.getToken()
+		if err != nil {
+			return
+		}
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 	}
 }
 
