@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sashabaranov/go-openai"
+	"github.com/bbang94/go-zhipuai"
 )
 
 func main() {
@@ -19,11 +19,11 @@ func main() {
 		return
 	}
 
-	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+	client := zhipuai.NewClient(os.Getenv("zhipuai_API_KEY"))
 	resp, err := client.CreateTranscription(
 		context.Background(),
-		openai.AudioRequest{
-			Model:    openai.Whisper1,
+		zhipuai.AudioRequest{
+			Model:    zhipuai.Whisper1,
 			FilePath: os.Args[1],
 		},
 	)

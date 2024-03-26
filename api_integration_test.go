@@ -1,6 +1,6 @@
 //go:build integration
 
-package openai_test
+package zhipuai_test
 
 import (
 	"context"
@@ -9,19 +9,19 @@ import (
 	"os"
 	"testing"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
-	"github.com/sashabaranov/go-openai/jsonschema"
+	"github.com/bbang94/go-zhipuai"
+	"github.com/bbang94/go-zhipuai/internal/test/checks"
+	"github.com/bbang94/go-zhipuai/jsonschema"
 )
 
 func TestAPI(t *testing.T) {
-	apiToken := os.Getenv("OPENAI_TOKEN")
+	apiToken := os.Getenv("zhipuai_TOKEN")
 	if apiToken == "" {
-		t.Skip("Skipping testing against production OpenAI API. Set OPENAI_TOKEN environment variable to enable it.")
+		t.Skip("Skipping testing against production zhipuai API. Set zhipuai_TOKEN environment variable to enable it.")
 	}
 
 	var err error
-	c := openai.NewClient(apiToken)
+	c := zhipuai.NewClient(apiToken)
 	ctx := context.Background()
 	_, err = c.ListEngines(ctx)
 	checks.NoError(t, err, "ListEngines error")
@@ -37,23 +37,23 @@ func TestAPI(t *testing.T) {
 		checks.NoError(t, err, "GetFile error")
 	} // else skip
 
-	embeddingReq := openai.EmbeddingRequest{
+	embeddingReq := zhipuai.EmbeddingRequest{
 		Input: []string{
 			"The food was delicious and the waiter",
 			"Other examples of embedding request",
 		},
-		Model: openai.AdaSearchQuery,
+		Model: zhipuai.AdaSearchQuery,
 	}
 	_, err = c.CreateEmbeddings(ctx, embeddingReq)
 	checks.NoError(t, err, "Embedding error")
 
 	_, err = c.CreateChatCompletion(
 		ctx,
-		openai.ChatCompletionRequest{
-			Model: openai.GPT3Dot5Turbo,
-			Messages: []openai.ChatCompletionMessage{
+		zhipuai.ChatCompletionRequest{
+			Model: zhipuai.GPT3Dot5Turbo,
+			Messages: []zhipuai.ChatCompletionMessage{
 				{
-					Role:    openai.ChatMessageRoleUser,
+					Role:    zhipuai.ChatMessageRoleUser,
 					Content: "Hello!",
 				},
 			},
@@ -64,11 +64,11 @@ func TestAPI(t *testing.T) {
 
 	_, err = c.CreateChatCompletion(
 		ctx,
-		openai.ChatCompletionRequest{
-			Model: openai.GPT3Dot5Turbo,
-			Messages: []openai.ChatCompletionMessage{
+		zhipuai.ChatCompletionRequest{
+			Model: zhipuai.GPT3Dot5Turbo,
+			Messages: []zhipuai.ChatCompletionMessage{
 				{
-					Role:    openai.ChatMessageRoleUser,
+					Role:    zhipuai.ChatMessageRoleUser,
 					Name:    "John_Doe",
 					Content: "Hello!",
 				},
@@ -77,9 +77,9 @@ func TestAPI(t *testing.T) {
 	)
 	checks.NoError(t, err, "CreateChatCompletion (with name) returned error")
 
-	stream, err := c.CreateCompletionStream(ctx, openai.CompletionRequest{
+	stream, err := c.CreateCompletionStream(ctx, zhipuai.CompletionRequest{
 		Prompt:    "Ex falso quodlibet",
-		Model:     openai.GPT3Ada,
+		Model:     zhipuai.GPT3Ada,
 		MaxTokens: 5,
 		Stream:    true,
 	})
@@ -104,15 +104,15 @@ func TestAPI(t *testing.T) {
 
 	_, err = c.CreateChatCompletion(
 		context.Background(),
-		openai.ChatCompletionRequest{
-			Model: openai.GPT3Dot5Turbo,
-			Messages: []openai.ChatCompletionMessage{
+		zhipuai.ChatCompletionRequest{
+			Model: zhipuai.GPT3Dot5Turbo,
+			Messages: []zhipuai.ChatCompletionMessage{
 				{
-					Role:    openai.ChatMessageRoleUser,
+					Role:    zhipuai.ChatMessageRoleUser,
 					Content: "What is the weather like in Boston?",
 				},
 			},
-			Functions: []openai.FunctionDefinition{{
+			Functions: []zhipuai.FunctionDefinition{{
 				Name: "get_current_weather",
 				Parameters: jsonschema.Definition{
 					Type: jsonschema.Object,
@@ -135,18 +135,18 @@ func TestAPI(t *testing.T) {
 }
 
 func TestAPIError(t *testing.T) {
-	apiToken := os.Getenv("OPENAI_TOKEN")
+	apiToken := os.Getenv("zhipuai_TOKEN")
 	if apiToken == "" {
-		t.Skip("Skipping testing against production OpenAI API. Set OPENAI_TOKEN environment variable to enable it.")
+		t.Skip("Skipping testing against production zhipuai API. Set zhipuai_TOKEN environment variable to enable it.")
 	}
 
 	var err error
-	c := openai.NewClient(apiToken + "_invalid")
+	c := zhipuai.NewClient(apiToken + "_invalid")
 	ctx := context.Background()
 	_, err = c.ListEngines(ctx)
 	checks.HasError(t, err, "ListEngines should fail with an invalid key")
 
-	var apiErr *openai.APIError
+	var apiErr *zhipuai.APIError
 	if !errors.As(err, &apiErr) {
 		t.Fatalf("Error is not an APIError: %+v", err)
 	}

@@ -1,4 +1,4 @@
-package openai_test
+package zhipuai_test
 
 import (
 	"context"
@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
-	"github.com/sashabaranov/go-openai/jsonschema"
+	"github.com/bbang94/go-zhipuai"
+	"github.com/bbang94/go-zhipuai/internal/test/checks"
+	"github.com/bbang94/go-zhipuai/jsonschema"
 )
 
 const (
@@ -32,28 +32,28 @@ var rateLimitHeaders = map[string]any{
 }
 
 func TestChatCompletionsWrongModel(t *testing.T) {
-	config := openai.DefaultConfig("whatever")
+	config := zhipuai.DefaultConfig("whatever")
 	config.BaseURL = "http://localhost/v1"
-	client := openai.NewClientWithConfig(config)
+	client := zhipuai.NewClientWithConfig(config)
 	ctx := context.Background()
 
-	req := openai.ChatCompletionRequest{
+	req := zhipuai.ChatCompletionRequest{
 		MaxTokens: 5,
 		Model:     "ada",
-		Messages: []openai.ChatCompletionMessage{
+		Messages: []zhipuai.ChatCompletionMessage{
 			{
-				Role:    openai.ChatMessageRoleUser,
+				Role:    zhipuai.ChatMessageRoleUser,
 				Content: "Hello!",
 			},
 		},
 	}
 	_, err := client.CreateChatCompletion(ctx, req)
 	msg := fmt.Sprintf("CreateChatCompletion should return wrong model error, returned: %s", err)
-	checks.ErrorIs(t, err, openai.ErrChatCompletionInvalidModel, msg)
+	checks.ErrorIs(t, err, zhipuai.ErrChatCompletionInvalidModel, msg)
 }
 
 func TestChatRequestOmitEmpty(t *testing.T) {
-	data, err := json.Marshal(openai.ChatCompletionRequest{
+	data, err := json.Marshal(zhipuai.ChatCompletionRequest{
 		// We set model b/c it's required, so omitempty doesn't make sense
 		Model: "gpt-4",
 	})
@@ -67,29 +67,29 @@ func TestChatRequestOmitEmpty(t *testing.T) {
 }
 
 func TestChatCompletionsWithStream(t *testing.T) {
-	config := openai.DefaultConfig("whatever")
+	config := zhipuai.DefaultConfig("whatever")
 	config.BaseURL = "http://localhost/v1"
-	client := openai.NewClientWithConfig(config)
+	client := zhipuai.NewClientWithConfig(config)
 	ctx := context.Background()
 
-	req := openai.ChatCompletionRequest{
+	req := zhipuai.ChatCompletionRequest{
 		Stream: true,
 	}
 	_, err := client.CreateChatCompletion(ctx, req)
-	checks.ErrorIs(t, err, openai.ErrChatCompletionStreamNotSupported, "unexpected error")
+	checks.ErrorIs(t, err, zhipuai.ErrChatCompletionStreamNotSupported, "unexpected error")
 }
 
 // TestCompletions Tests the completions endpoint of the API using the mocked server.
 func TestChatCompletions(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/chat/completions", handleChatCompletionEndpoint)
-	_, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+	_, err := client.CreateChatCompletion(context.Background(), zhipuai.ChatCompletionRequest{
 		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
+		Model:     zhipuai.GPT3Dot5Turbo,
+		Messages: []zhipuai.ChatCompletionMessage{
 			{
-				Role:    openai.ChatMessageRoleUser,
+				Role:    zhipuai.ChatMessageRoleUser,
 				Content: "Hello!",
 			},
 		},
@@ -99,15 +99,15 @@ func TestChatCompletions(t *testing.T) {
 
 // TestCompletions Tests the completions endpoint of the API using the mocked server.
 func TestChatCompletionsWithHeaders(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/chat/completions", handleChatCompletionEndpoint)
-	resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+	resp, err := client.CreateChatCompletion(context.Background(), zhipuai.ChatCompletionRequest{
 		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
+		Model:     zhipuai.GPT3Dot5Turbo,
+		Messages: []zhipuai.ChatCompletionMessage{
 			{
-				Role:    openai.ChatMessageRoleUser,
+				Role:    zhipuai.ChatMessageRoleUser,
 				Content: "Hello!",
 			},
 		},
@@ -123,15 +123,15 @@ func TestChatCompletionsWithHeaders(t *testing.T) {
 
 // TestChatCompletionsWithRateLimitHeaders Tests the completions endpoint of the API using the mocked server.
 func TestChatCompletionsWithRateLimitHeaders(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/chat/completions", handleChatCompletionEndpoint)
-	resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+	resp, err := client.CreateChatCompletion(context.Background(), zhipuai.ChatCompletionRequest{
 		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
+		Model:     zhipuai.GPT3Dot5Turbo,
+		Messages: []zhipuai.ChatCompletionMessage{
 			{
-				Role:    openai.ChatMessageRoleUser,
+				Role:    zhipuai.ChatMessageRoleUser,
 				Content: "Hello!",
 			},
 		},
@@ -157,22 +157,22 @@ func TestChatCompletionsWithRateLimitHeaders(t *testing.T) {
 
 // TestChatCompletionsFunctions tests including a function call.
 func TestChatCompletionsFunctions(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/chat/completions", handleChatCompletionEndpoint)
 	t.Run("bytes", func(t *testing.T) {
 		//nolint:lll
 		msg := json.RawMessage(`{"properties":{"count":{"type":"integer","description":"total number of words in sentence"},"words":{"items":{"type":"string"},"type":"array","description":"list of words in sentence"}},"type":"object","required":["count","words"]}`)
-		_, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+		_, err := client.CreateChatCompletion(context.Background(), zhipuai.ChatCompletionRequest{
 			MaxTokens: 5,
-			Model:     openai.GPT3Dot5Turbo0613,
-			Messages: []openai.ChatCompletionMessage{
+			Model:     zhipuai.GPT3Dot5Turbo0613,
+			Messages: []zhipuai.ChatCompletionMessage{
 				{
-					Role:    openai.ChatMessageRoleUser,
+					Role:    zhipuai.ChatMessageRoleUser,
 					Content: "Hello!",
 				},
 			},
-			Functions: []openai.FunctionDefinition{{
+			Functions: []zhipuai.FunctionDefinition{{
 				Name:       "test",
 				Parameters: &msg,
 			}},
@@ -188,16 +188,16 @@ func TestChatCompletionsFunctions(t *testing.T) {
 			Count: 2,
 			Words: []string{"hello", "world"},
 		}
-		_, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+		_, err := client.CreateChatCompletion(context.Background(), zhipuai.ChatCompletionRequest{
 			MaxTokens: 5,
-			Model:     openai.GPT3Dot5Turbo0613,
-			Messages: []openai.ChatCompletionMessage{
+			Model:     zhipuai.GPT3Dot5Turbo0613,
+			Messages: []zhipuai.ChatCompletionMessage{
 				{
-					Role:    openai.ChatMessageRoleUser,
+					Role:    zhipuai.ChatMessageRoleUser,
 					Content: "Hello!",
 				},
 			},
-			Functions: []openai.FunctionDefinition{{
+			Functions: []zhipuai.FunctionDefinition{{
 				Name:       "test",
 				Parameters: &msg,
 			}},
@@ -205,16 +205,16 @@ func TestChatCompletionsFunctions(t *testing.T) {
 		checks.NoError(t, err, "CreateChatCompletion with functions error")
 	})
 	t.Run("JSONSchemaDefinition", func(t *testing.T) {
-		_, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+		_, err := client.CreateChatCompletion(context.Background(), zhipuai.ChatCompletionRequest{
 			MaxTokens: 5,
-			Model:     openai.GPT3Dot5Turbo0613,
-			Messages: []openai.ChatCompletionMessage{
+			Model:     zhipuai.GPT3Dot5Turbo0613,
+			Messages: []zhipuai.ChatCompletionMessage{
 				{
-					Role:    openai.ChatMessageRoleUser,
+					Role:    zhipuai.ChatMessageRoleUser,
 					Content: "Hello!",
 				},
 			},
-			Functions: []openai.FunctionDefinition{{
+			Functions: []zhipuai.FunctionDefinition{{
 				Name: "test",
 				Parameters: &jsonschema.Definition{
 					Type: jsonschema.Object,
@@ -242,16 +242,16 @@ func TestChatCompletionsFunctions(t *testing.T) {
 	})
 	t.Run("JSONSchemaDefinitionWithFunctionDefine", func(t *testing.T) {
 		// this is a compatibility check
-		_, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+		_, err := client.CreateChatCompletion(context.Background(), zhipuai.ChatCompletionRequest{
 			MaxTokens: 5,
-			Model:     openai.GPT3Dot5Turbo0613,
-			Messages: []openai.ChatCompletionMessage{
+			Model:     zhipuai.GPT3Dot5Turbo0613,
+			Messages: []zhipuai.ChatCompletionMessage{
 				{
-					Role:    openai.ChatMessageRoleUser,
+					Role:    zhipuai.ChatMessageRoleUser,
 					Content: "Hello!",
 				},
 			},
-			Functions: []openai.FunctionDefine{{
+			Functions: []zhipuai.FunctionDefine{{
 				Name: "test",
 				Parameters: &jsonschema.Definition{
 					Type: jsonschema.Object,
@@ -282,14 +282,14 @@ func TestChatCompletionsFunctions(t *testing.T) {
 func TestAzureChatCompletions(t *testing.T) {
 	client, server, teardown := setupAzureTestServer()
 	defer teardown()
-	server.RegisterHandler("/openai/deployments/*", handleChatCompletionEndpoint)
+	server.RegisterHandler("/zhipuai/deployments/*", handleChatCompletionEndpoint)
 
-	_, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+	_, err := client.CreateChatCompletion(context.Background(), zhipuai.ChatCompletionRequest{
 		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
+		Model:     zhipuai.GPT3Dot5Turbo,
+		Messages: []zhipuai.ChatCompletionMessage{
 			{
-				Role:    openai.ChatMessageRoleUser,
+				Role:    zhipuai.ChatMessageRoleUser,
 				Content: "Hello!",
 			},
 		},
@@ -300,24 +300,24 @@ func TestAzureChatCompletions(t *testing.T) {
 func TestMultipartChatCompletions(t *testing.T) {
 	client, server, teardown := setupAzureTestServer()
 	defer teardown()
-	server.RegisterHandler("/openai/deployments/*", handleChatCompletionEndpoint)
+	server.RegisterHandler("/zhipuai/deployments/*", handleChatCompletionEndpoint)
 
-	_, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+	_, err := client.CreateChatCompletion(context.Background(), zhipuai.ChatCompletionRequest{
 		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
+		Model:     zhipuai.GPT3Dot5Turbo,
+		Messages: []zhipuai.ChatCompletionMessage{
 			{
-				Role: openai.ChatMessageRoleUser,
-				MultiContent: []openai.ChatMessagePart{
+				Role: zhipuai.ChatMessageRoleUser,
+				MultiContent: []zhipuai.ChatMessagePart{
 					{
-						Type: openai.ChatMessagePartTypeText,
+						Type: zhipuai.ChatMessagePartTypeText,
 						Text: "Hello!",
 					},
 					{
-						Type: openai.ChatMessagePartTypeImageURL,
-						ImageURL: &openai.ChatMessageImageURL{
+						Type: zhipuai.ChatMessagePartTypeImageURL,
+						ImageURL: &zhipuai.ChatMessageImageURL{
 							URL:    "URL",
-							Detail: openai.ImageURLDetailLow,
+							Detail: zhipuai.ImageURLDetailLow,
 						},
 					},
 				},
@@ -332,7 +332,7 @@ func TestMultipartChatMessageSerialization(t *testing.T) {
 		`{"role":"user","content":[{"type":"text","text":"nice-text"},` +
 		`{"type":"image_url","image_url":{"url":"URL","detail":"high"}}]}]`
 
-	var msgs []openai.ChatCompletionMessage
+	var msgs []zhipuai.ChatCompletionMessage
 	err := json.Unmarshal([]byte(jsonText), &msgs)
 	if err != nil {
 		t.Fatalf("Expected no error: %s", err)
@@ -363,11 +363,11 @@ func TestMultipartChatMessageSerialization(t *testing.T) {
 		t.Fatalf("invalid message: %s", string(s))
 	}
 
-	invalidMsg := []openai.ChatCompletionMessage{
+	invalidMsg := []zhipuai.ChatCompletionMessage{
 		{
 			Role:    "user",
 			Content: "some-text",
-			MultiContent: []openai.ChatMessagePart{
+			MultiContent: []zhipuai.ChatMessagePart{
 				{
 					Type: "text",
 					Text: "nice-text",
@@ -376,7 +376,7 @@ func TestMultipartChatMessageSerialization(t *testing.T) {
 		},
 	}
 	_, err = json.Marshal(invalidMsg)
-	if !errors.Is(err, openai.ErrContentFieldsMisused) {
+	if !errors.Is(err, zhipuai.ErrContentFieldsMisused) {
 		t.Fatalf("Expected error: %s", err)
 	}
 
@@ -385,9 +385,9 @@ func TestMultipartChatMessageSerialization(t *testing.T) {
 		t.Fatalf("Expected error")
 	}
 
-	emptyMultiContentMsg := openai.ChatCompletionMessage{
+	emptyMultiContentMsg := zhipuai.ChatCompletionMessage{
 		Role:         "user",
-		MultiContent: []openai.ChatMessagePart{},
+		MultiContent: []zhipuai.ChatMessagePart{},
 	}
 	s, err = json.Marshal(emptyMultiContentMsg)
 	if err != nil {
@@ -408,12 +408,12 @@ func handleChatCompletionEndpoint(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
-	var completionReq openai.ChatCompletionRequest
+	var completionReq zhipuai.ChatCompletionRequest
 	if completionReq, err = getChatCompletionBody(r); err != nil {
 		http.Error(w, "could not read request", http.StatusInternalServerError)
 		return
 	}
-	res := openai.ChatCompletionResponse{
+	res := zhipuai.ChatCompletionResponse{
 		ID:      strconv.Itoa(int(time.Now().Unix())),
 		Object:  "test-object",
 		Created: time.Now().Unix(),
@@ -438,11 +438,11 @@ func handleChatCompletionEndpoint(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			res.Choices = append(res.Choices, openai.ChatCompletionChoice{
-				Message: openai.ChatCompletionMessage{
-					Role: openai.ChatMessageRoleFunction,
+			res.Choices = append(res.Choices, zhipuai.ChatCompletionChoice{
+				Message: zhipuai.ChatCompletionMessage{
+					Role: zhipuai.ChatMessageRoleFunction,
 					// this is valid json so it should be fine
-					FunctionCall: &openai.FunctionCall{
+					FunctionCall: &zhipuai.FunctionCall{
 						Name:      completionReq.Functions[0].Name,
 						Arguments: string(fcb),
 					},
@@ -454,9 +454,9 @@ func handleChatCompletionEndpoint(w http.ResponseWriter, r *http.Request) {
 		// generate a random string of length completionReq.Length
 		completionStr := strings.Repeat("a", completionReq.MaxTokens)
 
-		res.Choices = append(res.Choices, openai.ChatCompletionChoice{
-			Message: openai.ChatCompletionMessage{
-				Role:    openai.ChatMessageRoleAssistant,
+		res.Choices = append(res.Choices, zhipuai.ChatCompletionChoice{
+			Message: zhipuai.ChatCompletionMessage{
+				Role:    zhipuai.ChatMessageRoleAssistant,
 				Content: completionStr,
 			},
 			Index: i,
@@ -464,7 +464,7 @@ func handleChatCompletionEndpoint(w http.ResponseWriter, r *http.Request) {
 	}
 	inputTokens := numTokens(completionReq.Messages[0].Content) * n
 	completionTokens := completionReq.MaxTokens * n
-	res.Usage = openai.Usage{
+	res.Usage = zhipuai.Usage{
 		PromptTokens:     inputTokens,
 		CompletionTokens: completionTokens,
 		TotalTokens:      inputTokens + completionTokens,
@@ -483,23 +483,23 @@ func handleChatCompletionEndpoint(w http.ResponseWriter, r *http.Request) {
 }
 
 // getChatCompletionBody Returns the body of the request to create a completion.
-func getChatCompletionBody(r *http.Request) (openai.ChatCompletionRequest, error) {
-	completion := openai.ChatCompletionRequest{}
+func getChatCompletionBody(r *http.Request) (zhipuai.ChatCompletionRequest, error) {
+	completion := zhipuai.ChatCompletionRequest{}
 	// read the request body
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
-		return openai.ChatCompletionRequest{}, err
+		return zhipuai.ChatCompletionRequest{}, err
 	}
 	err = json.Unmarshal(reqBody, &completion)
 	if err != nil {
-		return openai.ChatCompletionRequest{}, err
+		return zhipuai.ChatCompletionRequest{}, err
 	}
 	return completion, nil
 }
 
 func TestFinishReason(t *testing.T) {
-	c := &openai.ChatCompletionChoice{
-		FinishReason: openai.FinishReasonNull,
+	c := &zhipuai.ChatCompletionChoice{
+		FinishReason: zhipuai.FinishReasonNull,
 	}
 	resBytes, _ := json.Marshal(c)
 	if !strings.Contains(string(resBytes), `"finish_reason":null`) {
@@ -513,11 +513,11 @@ func TestFinishReason(t *testing.T) {
 		t.Error("null should not be quoted")
 	}
 
-	otherReasons := []openai.FinishReason{
-		openai.FinishReasonStop,
-		openai.FinishReasonLength,
-		openai.FinishReasonFunctionCall,
-		openai.FinishReasonContentFilter,
+	otherReasons := []zhipuai.FinishReason{
+		zhipuai.FinishReasonStop,
+		zhipuai.FinishReasonLength,
+		zhipuai.FinishReasonFunctionCall,
+		zhipuai.FinishReasonContentFilter,
 	}
 	for _, r := range otherReasons {
 		c.FinishReason = r

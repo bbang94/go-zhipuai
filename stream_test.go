@@ -1,4 +1,4 @@
-package openai_test
+package zhipuai_test
 
 import (
 	"context"
@@ -10,29 +10,29 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/bbang94/go-zhipuai"
+	"github.com/bbang94/go-zhipuai/internal/test/checks"
 )
 
 func TestCompletionsStreamWrongModel(t *testing.T) {
-	config := openai.DefaultConfig("whatever")
+	config := zhipuai.DefaultConfig("whatever")
 	config.BaseURL = "http://localhost/v1"
-	client := openai.NewClientWithConfig(config)
+	client := zhipuai.NewClientWithConfig(config)
 
 	_, err := client.CreateCompletionStream(
 		context.Background(),
-		openai.CompletionRequest{
+		zhipuai.CompletionRequest{
 			MaxTokens: 5,
-			Model:     openai.GPT3Dot5Turbo,
+			Model:     zhipuai.GPT3Dot5Turbo,
 		},
 	)
-	if !errors.Is(err, openai.ErrCompletionUnsupportedModel) {
+	if !errors.Is(err, zhipuai.ErrCompletionUnsupportedModel) {
 		t.Fatalf("CreateCompletion should return ErrCompletionUnsupportedModel, but returned: %v", err)
 	}
 }
 
 func TestCreateCompletionStream(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/completions", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
@@ -56,7 +56,7 @@ func TestCreateCompletionStream(t *testing.T) {
 		checks.NoError(t, err, "Write error")
 	})
 
-	stream, err := client.CreateCompletionStream(context.Background(), openai.CompletionRequest{
+	stream, err := client.CreateCompletionStream(context.Background(), zhipuai.CompletionRequest{
 		Prompt:    "Ex falso quodlibet",
 		Model:     "text-davinci-002",
 		MaxTokens: 10,
@@ -65,20 +65,20 @@ func TestCreateCompletionStream(t *testing.T) {
 	checks.NoError(t, err, "CreateCompletionStream returned error")
 	defer stream.Close()
 
-	expectedResponses := []openai.CompletionResponse{
+	expectedResponses := []zhipuai.CompletionResponse{
 		{
 			ID:      "1",
 			Object:  "completion",
 			Created: 1598069254,
 			Model:   "text-davinci-002",
-			Choices: []openai.CompletionChoice{{Text: "response1", FinishReason: "max_tokens"}},
+			Choices: []zhipuai.CompletionChoice{{Text: "response1", FinishReason: "max_tokens"}},
 		},
 		{
 			ID:      "2",
 			Object:  "completion",
 			Created: 1598069255,
 			Model:   "text-davinci-002",
-			Choices: []openai.CompletionChoice{{Text: "response2", FinishReason: "max_tokens"}},
+			Choices: []zhipuai.CompletionChoice{{Text: "response2", FinishReason: "max_tokens"}},
 		},
 	}
 
@@ -104,7 +104,7 @@ func TestCreateCompletionStream(t *testing.T) {
 }
 
 func TestCreateCompletionStreamError(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/completions", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
@@ -129,9 +129,9 @@ func TestCreateCompletionStreamError(t *testing.T) {
 		checks.NoError(t, err, "Write error")
 	})
 
-	stream, err := client.CreateCompletionStream(context.Background(), openai.CompletionRequest{
+	stream, err := client.CreateCompletionStream(context.Background(), zhipuai.CompletionRequest{
 		MaxTokens: 5,
-		Model:     openai.GPT3TextDavinci003,
+		Model:     zhipuai.GPT3TextDavinci003,
 		Prompt:    "Hello!",
 		Stream:    true,
 	})
@@ -141,7 +141,7 @@ func TestCreateCompletionStreamError(t *testing.T) {
 	_, streamErr := stream.Recv()
 	checks.HasError(t, streamErr, "stream.Recv() did not return error")
 
-	var apiErr *openai.APIError
+	var apiErr *zhipuai.APIError
 	if !errors.As(streamErr, &apiErr) {
 		t.Errorf("stream.Recv() did not return APIError")
 	}
@@ -149,7 +149,7 @@ func TestCreateCompletionStreamError(t *testing.T) {
 }
 
 func TestCreateCompletionStreamRateLimitError(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/completions", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -166,10 +166,10 @@ func TestCreateCompletionStreamRateLimitError(t *testing.T) {
 		checks.NoError(t, err, "Write error")
 	})
 
-	var apiErr *openai.APIError
-	_, err := client.CreateCompletionStream(context.Background(), openai.CompletionRequest{
+	var apiErr *zhipuai.APIError
+	_, err := client.CreateCompletionStream(context.Background(), zhipuai.CompletionRequest{
 		MaxTokens: 5,
-		Model:     openai.GPT3Ada,
+		Model:     zhipuai.GPT3Ada,
 		Prompt:    "Hello!",
 		Stream:    true,
 	})
@@ -180,7 +180,7 @@ func TestCreateCompletionStreamRateLimitError(t *testing.T) {
 }
 
 func TestCreateCompletionStreamTooManyEmptyStreamMessagesError(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/completions", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
@@ -209,7 +209,7 @@ func TestCreateCompletionStreamTooManyEmptyStreamMessagesError(t *testing.T) {
 		checks.NoError(t, err, "Write error")
 	})
 
-	stream, err := client.CreateCompletionStream(context.Background(), openai.CompletionRequest{
+	stream, err := client.CreateCompletionStream(context.Background(), zhipuai.CompletionRequest{
 		Prompt:    "Ex falso quodlibet",
 		Model:     "text-davinci-002",
 		MaxTokens: 10,
@@ -220,13 +220,13 @@ func TestCreateCompletionStreamTooManyEmptyStreamMessagesError(t *testing.T) {
 
 	_, _ = stream.Recv()
 	_, streamErr := stream.Recv()
-	if !errors.Is(streamErr, openai.ErrTooManyEmptyStreamMessages) {
+	if !errors.Is(streamErr, zhipuai.ErrTooManyEmptyStreamMessages) {
 		t.Errorf("TestCreateCompletionStreamTooManyEmptyStreamMessagesError did not return ErrTooManyEmptyStreamMessages")
 	}
 }
 
 func TestCreateCompletionStreamUnexpectedTerminatedError(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/completions", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
@@ -244,7 +244,7 @@ func TestCreateCompletionStreamUnexpectedTerminatedError(t *testing.T) {
 		checks.NoError(t, err, "Write error")
 	})
 
-	stream, err := client.CreateCompletionStream(context.Background(), openai.CompletionRequest{
+	stream, err := client.CreateCompletionStream(context.Background(), zhipuai.CompletionRequest{
 		Prompt:    "Ex falso quodlibet",
 		Model:     "text-davinci-002",
 		MaxTokens: 10,
@@ -261,7 +261,7 @@ func TestCreateCompletionStreamUnexpectedTerminatedError(t *testing.T) {
 }
 
 func TestCreateCompletionStreamBrokenJSONError(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/completions", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
@@ -285,7 +285,7 @@ func TestCreateCompletionStreamBrokenJSONError(t *testing.T) {
 		checks.NoError(t, err, "Write error")
 	})
 
-	stream, err := client.CreateCompletionStream(context.Background(), openai.CompletionRequest{
+	stream, err := client.CreateCompletionStream(context.Background(), zhipuai.CompletionRequest{
 		Prompt:    "Ex falso quodlibet",
 		Model:     "text-davinci-002",
 		MaxTokens: 10,
@@ -303,7 +303,7 @@ func TestCreateCompletionStreamBrokenJSONError(t *testing.T) {
 }
 
 func TestCreateCompletionStreamReturnTimeoutError(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/completions", func(http.ResponseWriter, *http.Request) {
 		time.Sleep(10 * time.Nanosecond)
@@ -312,7 +312,7 @@ func TestCreateCompletionStreamReturnTimeoutError(t *testing.T) {
 	ctx, cancel := context.WithTimeout(ctx, time.Nanosecond)
 	defer cancel()
 
-	_, err := client.CreateCompletionStream(ctx, openai.CompletionRequest{
+	_, err := client.CreateCompletionStream(ctx, zhipuai.CompletionRequest{
 		Prompt:    "Ex falso quodlibet",
 		Model:     "text-davinci-002",
 		MaxTokens: 10,
@@ -327,7 +327,7 @@ func TestCreateCompletionStreamReturnTimeoutError(t *testing.T) {
 }
 
 // Helper funcs.
-func compareResponses(r1, r2 openai.CompletionResponse) bool {
+func compareResponses(r1, r2 zhipuai.CompletionResponse) bool {
 	if r1.ID != r2.ID || r1.Object != r2.Object || r1.Created != r2.Created || r1.Model != r2.Model {
 		return false
 	}
@@ -342,7 +342,7 @@ func compareResponses(r1, r2 openai.CompletionResponse) bool {
 	return true
 }
 
-func compareResponseChoices(c1, c2 openai.CompletionChoice) bool {
+func compareResponseChoices(c1, c2 zhipuai.CompletionChoice) bool {
 	if c1.Text != c2.Text || c1.FinishReason != c2.FinishReason {
 		return false
 	}

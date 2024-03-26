@@ -1,4 +1,4 @@
-package openai_test
+package zhipuai_test
 
 import (
 	"context"
@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"testing"
 
-	openai "github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	zhipuai "github.com/bbang94/go-zhipuai"
+	"github.com/bbang94/go-zhipuai/internal/test/checks"
 )
 
 // TestThread Tests the thread endpoint of the API using the mocked server.
 func TestThread(t *testing.T) {
 	threadID := "thread_abc123"
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 
 	server.RegisterHandler(
@@ -22,18 +22,18 @@ func TestThread(t *testing.T) {
 		func(w http.ResponseWriter, r *http.Request) {
 			switch r.Method {
 			case http.MethodGet:
-				resBytes, _ := json.Marshal(openai.Thread{
+				resBytes, _ := json.Marshal(zhipuai.Thread{
 					ID:        threadID,
 					Object:    "thread",
 					CreatedAt: 1234567890,
 				})
 				fmt.Fprintln(w, string(resBytes))
 			case http.MethodPost:
-				var request openai.ThreadRequest
+				var request zhipuai.ThreadRequest
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.Thread{
+				resBytes, _ := json.Marshal(zhipuai.Thread{
 					ID:        threadID,
 					Object:    "thread",
 					CreatedAt: 1234567890,
@@ -53,11 +53,11 @@ func TestThread(t *testing.T) {
 		"/v1/threads",
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodPost {
-				var request openai.ModifyThreadRequest
+				var request zhipuai.ModifyThreadRequest
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.Thread{
+				resBytes, _ := json.Marshal(zhipuai.Thread{
 					ID:        threadID,
 					Object:    "thread",
 					CreatedAt: 1234567890,
@@ -70,10 +70,10 @@ func TestThread(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, err := client.CreateThread(ctx, openai.ThreadRequest{
-		Messages: []openai.ThreadMessage{
+	_, err := client.CreateThread(ctx, zhipuai.ThreadRequest{
+		Messages: []zhipuai.ThreadMessage{
 			{
-				Role:    openai.ThreadMessageRoleUser,
+				Role:    zhipuai.ThreadMessageRoleUser,
 				Content: "Hello, World!",
 			},
 		},
@@ -83,7 +83,7 @@ func TestThread(t *testing.T) {
 	_, err = client.RetrieveThread(ctx, threadID)
 	checks.NoError(t, err, "RetrieveThread error")
 
-	_, err = client.ModifyThread(ctx, threadID, openai.ModifyThreadRequest{
+	_, err = client.ModifyThread(ctx, threadID, zhipuai.ModifyThreadRequest{
 		Metadata: map[string]interface{}{
 			"key": "value",
 		},
@@ -101,22 +101,22 @@ func TestAzureThread(t *testing.T) {
 	defer teardown()
 
 	server.RegisterHandler(
-		"/openai/threads/"+threadID,
+		"/zhipuai/threads/"+threadID,
 		func(w http.ResponseWriter, r *http.Request) {
 			switch r.Method {
 			case http.MethodGet:
-				resBytes, _ := json.Marshal(openai.Thread{
+				resBytes, _ := json.Marshal(zhipuai.Thread{
 					ID:        threadID,
 					Object:    "thread",
 					CreatedAt: 1234567890,
 				})
 				fmt.Fprintln(w, string(resBytes))
 			case http.MethodPost:
-				var request openai.ThreadRequest
+				var request zhipuai.ThreadRequest
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.Thread{
+				resBytes, _ := json.Marshal(zhipuai.Thread{
 					ID:        threadID,
 					Object:    "thread",
 					CreatedAt: 1234567890,
@@ -133,14 +133,14 @@ func TestAzureThread(t *testing.T) {
 	)
 
 	server.RegisterHandler(
-		"/openai/threads",
+		"/zhipuai/threads",
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodPost {
-				var request openai.ModifyThreadRequest
+				var request zhipuai.ModifyThreadRequest
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.Thread{
+				resBytes, _ := json.Marshal(zhipuai.Thread{
 					ID:        threadID,
 					Object:    "thread",
 					CreatedAt: 1234567890,
@@ -153,10 +153,10 @@ func TestAzureThread(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, err := client.CreateThread(ctx, openai.ThreadRequest{
-		Messages: []openai.ThreadMessage{
+	_, err := client.CreateThread(ctx, zhipuai.ThreadRequest{
+		Messages: []zhipuai.ThreadMessage{
 			{
-				Role:    openai.ThreadMessageRoleUser,
+				Role:    zhipuai.ThreadMessageRoleUser,
 				Content: "Hello, World!",
 			},
 		},
@@ -166,7 +166,7 @@ func TestAzureThread(t *testing.T) {
 	_, err = client.RetrieveThread(ctx, threadID)
 	checks.NoError(t, err, "RetrieveThread error")
 
-	_, err = client.ModifyThread(ctx, threadID, openai.ModifyThreadRequest{
+	_, err = client.ModifyThread(ctx, threadID, zhipuai.ModifyThreadRequest{
 		Metadata: map[string]interface{}{
 			"key": "value",
 		},

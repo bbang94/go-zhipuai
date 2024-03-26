@@ -1,10 +1,10 @@
-package openai_test
+package zhipuai_test
 
 import (
 	"context"
 
-	openai "github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	zhipuai "github.com/bbang94/go-zhipuai"
+	"github.com/bbang94/go-zhipuai/internal/test/checks"
 
 	"encoding/json"
 	"fmt"
@@ -23,18 +23,18 @@ func TestRun(t *testing.T) {
 	after := "asst_abc122"
 	before := "asst_abc124"
 
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 
 	server.RegisterHandler(
 		"/v1/threads/"+threadID+"/runs/"+runID+"/steps/"+stepID,
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodGet {
-				resBytes, _ := json.Marshal(openai.RunStep{
+				resBytes, _ := json.Marshal(zhipuai.RunStep{
 					ID:        runID,
 					Object:    "run",
 					CreatedAt: 1234567890,
-					Status:    openai.RunStepStatusCompleted,
+					Status:    zhipuai.RunStepStatusCompleted,
 				})
 				fmt.Fprintln(w, string(resBytes))
 			}
@@ -45,13 +45,13 @@ func TestRun(t *testing.T) {
 		"/v1/threads/"+threadID+"/runs/"+runID+"/steps",
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodGet {
-				resBytes, _ := json.Marshal(openai.RunStepList{
-					RunSteps: []openai.RunStep{
+				resBytes, _ := json.Marshal(zhipuai.RunStepList{
+					RunSteps: []zhipuai.RunStep{
 						{
 							ID:        runID,
 							Object:    "run",
 							CreatedAt: 1234567890,
-							Status:    openai.RunStepStatusCompleted,
+							Status:    zhipuai.RunStepStatusCompleted,
 						},
 					},
 				})
@@ -64,11 +64,11 @@ func TestRun(t *testing.T) {
 		"/v1/threads/"+threadID+"/runs/"+runID+"/cancel",
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodPost {
-				resBytes, _ := json.Marshal(openai.Run{
+				resBytes, _ := json.Marshal(zhipuai.Run{
 					ID:        runID,
 					Object:    "run",
 					CreatedAt: 1234567890,
-					Status:    openai.RunStatusCancelling,
+					Status:    zhipuai.RunStatusCancelling,
 				})
 				fmt.Fprintln(w, string(resBytes))
 			}
@@ -79,11 +79,11 @@ func TestRun(t *testing.T) {
 		"/v1/threads/"+threadID+"/runs/"+runID+"/submit_tool_outputs",
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodPost {
-				resBytes, _ := json.Marshal(openai.Run{
+				resBytes, _ := json.Marshal(zhipuai.Run{
 					ID:        runID,
 					Object:    "run",
 					CreatedAt: 1234567890,
-					Status:    openai.RunStatusCancelling,
+					Status:    zhipuai.RunStatusCancelling,
 				})
 				fmt.Fprintln(w, string(resBytes))
 			}
@@ -94,23 +94,23 @@ func TestRun(t *testing.T) {
 		"/v1/threads/"+threadID+"/runs/"+runID,
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodGet {
-				resBytes, _ := json.Marshal(openai.Run{
+				resBytes, _ := json.Marshal(zhipuai.Run{
 					ID:        runID,
 					Object:    "run",
 					CreatedAt: 1234567890,
-					Status:    openai.RunStatusQueued,
+					Status:    zhipuai.RunStatusQueued,
 				})
 				fmt.Fprintln(w, string(resBytes))
 			} else if r.Method == http.MethodPost {
-				var request openai.RunModifyRequest
+				var request zhipuai.RunModifyRequest
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.Run{
+				resBytes, _ := json.Marshal(zhipuai.Run{
 					ID:        runID,
 					Object:    "run",
 					CreatedAt: 1234567890,
-					Status:    openai.RunStatusQueued,
+					Status:    zhipuai.RunStatusQueued,
 					Metadata:  request.Metadata,
 				})
 				fmt.Fprintln(w, string(resBytes))
@@ -122,25 +122,25 @@ func TestRun(t *testing.T) {
 		"/v1/threads/"+threadID+"/runs",
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodPost {
-				var request openai.RunRequest
+				var request zhipuai.RunRequest
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.Run{
+				resBytes, _ := json.Marshal(zhipuai.Run{
 					ID:        runID,
 					Object:    "run",
 					CreatedAt: 1234567890,
-					Status:    openai.RunStatusQueued,
+					Status:    zhipuai.RunStatusQueued,
 				})
 				fmt.Fprintln(w, string(resBytes))
 			} else if r.Method == http.MethodGet {
-				resBytes, _ := json.Marshal(openai.RunList{
-					Runs: []openai.Run{
+				resBytes, _ := json.Marshal(zhipuai.RunList{
+					Runs: []zhipuai.Run{
 						{
 							ID:        runID,
 							Object:    "run",
 							CreatedAt: 1234567890,
-							Status:    openai.RunStatusQueued,
+							Status:    zhipuai.RunStatusQueued,
 						},
 					},
 				})
@@ -153,15 +153,15 @@ func TestRun(t *testing.T) {
 		"/v1/threads/runs",
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodPost {
-				var request openai.CreateThreadAndRunRequest
+				var request zhipuai.CreateThreadAndRunRequest
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.Run{
+				resBytes, _ := json.Marshal(zhipuai.Run{
 					ID:        runID,
 					Object:    "run",
 					CreatedAt: 1234567890,
-					Status:    openai.RunStatusQueued,
+					Status:    zhipuai.RunStatusQueued,
 				})
 				fmt.Fprintln(w, string(resBytes))
 			}
@@ -170,7 +170,7 @@ func TestRun(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, err := client.CreateRun(ctx, threadID, openai.RunRequest{
+	_, err := client.CreateRun(ctx, threadID, zhipuai.RunRequest{
 		AssistantID: assistantID,
 	})
 	checks.NoError(t, err, "CreateRun error")
@@ -178,7 +178,7 @@ func TestRun(t *testing.T) {
 	_, err = client.RetrieveRun(ctx, threadID, runID)
 	checks.NoError(t, err, "RetrieveRun error")
 
-	_, err = client.ModifyRun(ctx, threadID, runID, openai.RunModifyRequest{
+	_, err = client.ModifyRun(ctx, threadID, runID, zhipuai.RunModifyRequest{
 		Metadata: map[string]any{
 			"key": "value",
 		},
@@ -188,7 +188,7 @@ func TestRun(t *testing.T) {
 	_, err = client.ListRuns(
 		ctx,
 		threadID,
-		openai.Pagination{
+		zhipuai.Pagination{
 			Limit:  &limit,
 			Order:  &order,
 			After:  &after,
@@ -198,20 +198,20 @@ func TestRun(t *testing.T) {
 	checks.NoError(t, err, "ListRuns error")
 
 	_, err = client.SubmitToolOutputs(ctx, threadID, runID,
-		openai.SubmitToolOutputsRequest{})
+		zhipuai.SubmitToolOutputsRequest{})
 	checks.NoError(t, err, "SubmitToolOutputs error")
 
 	_, err = client.CancelRun(ctx, threadID, runID)
 	checks.NoError(t, err, "CancelRun error")
 
-	_, err = client.CreateThreadAndRun(ctx, openai.CreateThreadAndRunRequest{
-		RunRequest: openai.RunRequest{
+	_, err = client.CreateThreadAndRun(ctx, zhipuai.CreateThreadAndRunRequest{
+		RunRequest: zhipuai.RunRequest{
 			AssistantID: assistantID,
 		},
-		Thread: openai.ThreadRequest{
-			Messages: []openai.ThreadMessage{
+		Thread: zhipuai.ThreadRequest{
+			Messages: []zhipuai.ThreadMessage{
 				{
-					Role:    openai.ThreadMessageRoleUser,
+					Role:    zhipuai.ThreadMessageRoleUser,
 					Content: "Hello, World!",
 				},
 			},
@@ -226,7 +226,7 @@ func TestRun(t *testing.T) {
 		ctx,
 		threadID,
 		runID,
-		openai.Pagination{
+		zhipuai.Pagination{
 			Limit:  &limit,
 			Order:  &order,
 			After:  &after,

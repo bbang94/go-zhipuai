@@ -1,4 +1,4 @@
-package openai
+package zhipuai
 
 import (
 	"bytes"
@@ -27,7 +27,7 @@ const (
 
 // FileBytesRequest represents a file upload request.
 type FileBytesRequest struct {
-	// the name of the uploaded file in OpenAI
+	// the name of the uploaded file in zhipuai
 	Name string
 	// the bytes of the file
 	Bytes []byte
@@ -56,7 +56,7 @@ type FilesList struct {
 	httpHeader
 }
 
-// CreateFileBytes uploads bytes directly to OpenAI without requiring a local file.
+// CreateFileBytes uploads bytes directly to zhipuai without requiring a local file.
 func (c *Client) CreateFileBytes(ctx context.Context, request FileBytesRequest) (file File, err error) {
 	var b bytes.Buffer
 	reader := bytes.NewReader(request.Bytes)

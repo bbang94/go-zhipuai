@@ -1,4 +1,4 @@
-package openai //nolint:testpackage // testing private field
+package zhipuai //nolint:testpackage // testing private field
 
 import (
 	"bufio"
@@ -6,9 +6,9 @@ import (
 	"errors"
 	"testing"
 
-	utils "github.com/sashabaranov/go-openai/internal"
-	"github.com/sashabaranov/go-openai/internal/test"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	utils "github.com/bbang94/go-zhipuai/internal"
+	"github.com/bbang94/go-zhipuai/internal/test"
+	"github.com/bbang94/go-zhipuai/internal/test/checks"
 )
 
 var errTestUnmarshalerFailed = errors.New("test unmarshaler failed")

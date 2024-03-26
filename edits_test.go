@@ -1,4 +1,4 @@
-package openai_test
+package zhipuai_test
 
 import (
 	"context"
@@ -9,18 +9,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/bbang94/go-zhipuai"
+	"github.com/bbang94/go-zhipuai/internal/test/checks"
 )
 
 // TestEdits Tests the edits endpoint of the API using the mocked server.
 func TestEdits(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/edits", handleEditEndpoint)
 	// create an edit request
 	model := "ada"
-	editReq := openai.EditsRequest{
+	editReq := zhipuai.EditsRequest{
 		Model: &model,
 		Input: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, " +
 			"sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim" +
@@ -45,29 +45,29 @@ func handleEditEndpoint(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
-	var editReq openai.EditsRequest
+	var editReq zhipuai.EditsRequest
 	editReq, err = getEditBody(r)
 	if err != nil {
 		http.Error(w, "could not read request", http.StatusInternalServerError)
 		return
 	}
 	// create a response
-	res := openai.EditsResponse{
+	res := zhipuai.EditsResponse{
 		Object:  "test-object",
 		Created: time.Now().Unix(),
 	}
 	// edit and calculate token usage
-	editString := "edited by mocked OpenAI server :)"
+	editString := "edited by mocked zhipuai server :)"
 	inputTokens := numTokens(editReq.Input+editReq.Instruction) * editReq.N
 	completionTokens := int(float32(len(editString))/4) * editReq.N
 	for i := 0; i < editReq.N; i++ {
-		// instruction will be hidden and only seen by OpenAI
-		res.Choices = append(res.Choices, openai.EditsChoice{
+		// instruction will be hidden and only seen by zhipuai
+		res.Choices = append(res.Choices, zhipuai.EditsChoice{
 			Text:  editReq.Input + editString,
 			Index: i,
 		})
 	}
-	res.Usage = openai.Usage{
+	res.Usage = zhipuai.Usage{
 		PromptTokens:     inputTokens,
 		CompletionTokens: completionTokens,
 		TotalTokens:      inputTokens + completionTokens,
@@ -77,16 +77,16 @@ func handleEditEndpoint(w http.ResponseWriter, r *http.Request) {
 }
 
 // getEditBody Returns the body of the request to create an edit.
-func getEditBody(r *http.Request) (openai.EditsRequest, error) {
-	edit := openai.EditsRequest{}
+func getEditBody(r *http.Request) (zhipuai.EditsRequest, error) {
+	edit := zhipuai.EditsRequest{}
 	// read the request body
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
-		return openai.EditsRequest{}, err
+		return zhipuai.EditsRequest{}, err
 	}
 	err = json.Unmarshal(reqBody, &edit)
 	if err != nil {
-		return openai.EditsRequest{}, err
+		return zhipuai.EditsRequest{}, err
 	}
 	return edit, nil
 }

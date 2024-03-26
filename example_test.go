@@ -1,4 +1,4 @@
-package openai_test
+package zhipuai_test
 
 import (
 	"bufio"
@@ -11,18 +11,18 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/sashabaranov/go-openai"
+	"github.com/bbang94/go-zhipuai"
 )
 
 func Example() {
-	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+	client := zhipuai.NewClient(os.Getenv("zhipuai_API_KEY"))
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
-		openai.ChatCompletionRequest{
-			Model: openai.GPT3Dot5Turbo,
-			Messages: []openai.ChatCompletionMessage{
+		zhipuai.ChatCompletionRequest{
+			Model: zhipuai.GPT3Dot5Turbo,
+			Messages: []zhipuai.ChatCompletionMessage{
 				{
-					Role:    openai.ChatMessageRoleUser,
+					Role:    zhipuai.ChatMessageRoleUser,
 					Content: "Hello!",
 				},
 			},
@@ -37,16 +37,16 @@ func Example() {
 }
 
 func ExampleClient_CreateChatCompletionStream() {
-	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+	client := zhipuai.NewClient(os.Getenv("zhipuai_API_KEY"))
 
 	stream, err := client.CreateChatCompletionStream(
 		context.Background(),
-		openai.ChatCompletionRequest{
-			Model:     openai.GPT3Dot5Turbo,
+		zhipuai.ChatCompletionRequest{
+			Model:     zhipuai.GPT3Dot5Turbo,
 			MaxTokens: 20,
-			Messages: []openai.ChatCompletionMessage{
+			Messages: []zhipuai.ChatCompletionMessage{
 				{
-					Role:    openai.ChatMessageRoleUser,
+					Role:    zhipuai.ChatMessageRoleUser,
 					Content: "Lorem ipsum",
 				},
 			},
@@ -61,7 +61,7 @@ func ExampleClient_CreateChatCompletionStream() {
 
 	fmt.Printf("Stream response: ")
 	for {
-		var response openai.ChatCompletionStreamResponse
+		var response zhipuai.ChatCompletionStreamResponse
 		response, err = stream.Recv()
 		if errors.Is(err, io.EOF) {
 			fmt.Println("\nStream finished")
@@ -78,11 +78,11 @@ func ExampleClient_CreateChatCompletionStream() {
 }
 
 func ExampleClient_CreateCompletion() {
-	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+	client := zhipuai.NewClient(os.Getenv("zhipuai_API_KEY"))
 	resp, err := client.CreateCompletion(
 		context.Background(),
-		openai.CompletionRequest{
-			Model:     openai.GPT3Ada,
+		zhipuai.CompletionRequest{
+			Model:     zhipuai.GPT3Ada,
 			MaxTokens: 5,
 			Prompt:    "Lorem ipsum",
 		},
@@ -95,11 +95,11 @@ func ExampleClient_CreateCompletion() {
 }
 
 func ExampleClient_CreateCompletionStream() {
-	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+	client := zhipuai.NewClient(os.Getenv("zhipuai_API_KEY"))
 	stream, err := client.CreateCompletionStream(
 		context.Background(),
-		openai.CompletionRequest{
-			Model:     openai.GPT3Ada,
+		zhipuai.CompletionRequest{
+			Model:     zhipuai.GPT3Ada,
 			MaxTokens: 5,
 			Prompt:    "Lorem ipsum",
 			Stream:    true,
@@ -112,7 +112,7 @@ func ExampleClient_CreateCompletionStream() {
 	defer stream.Close()
 
 	for {
-		var response openai.CompletionResponse
+		var response zhipuai.CompletionResponse
 		response, err = stream.Recv()
 		if errors.Is(err, io.EOF) {
 			fmt.Println("Stream finished")
@@ -129,11 +129,11 @@ func ExampleClient_CreateCompletionStream() {
 }
 
 func ExampleClient_CreateTranscription() {
-	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+	client := zhipuai.NewClient(os.Getenv("zhipuai_API_KEY"))
 	resp, err := client.CreateTranscription(
 		context.Background(),
-		openai.AudioRequest{
-			Model:    openai.Whisper1,
+		zhipuai.AudioRequest{
+			Model:    zhipuai.Whisper1,
 			FilePath: "recording.mp3",
 		},
 	)
@@ -145,14 +145,14 @@ func ExampleClient_CreateTranscription() {
 }
 
 func ExampleClient_CreateTranscription_captions() {
-	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+	client := zhipuai.NewClient(os.Getenv("zhipuai_API_KEY"))
 
 	resp, err := client.CreateTranscription(
 		context.Background(),
-		openai.AudioRequest{
-			Model:    openai.Whisper1,
+		zhipuai.AudioRequest{
+			Model:    zhipuai.Whisper1,
 			FilePath: os.Args[1],
-			Format:   openai.AudioResponseFormatSRT,
+			Format:   zhipuai.AudioResponseFormatSRT,
 		},
 	)
 	if err != nil {
@@ -172,11 +172,11 @@ func ExampleClient_CreateTranscription_captions() {
 }
 
 func ExampleClient_CreateTranslation() {
-	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+	client := zhipuai.NewClient(os.Getenv("zhipuai_API_KEY"))
 	resp, err := client.CreateTranslation(
 		context.Background(),
-		openai.AudioRequest{
-			Model:    openai.Whisper1,
+		zhipuai.AudioRequest{
+			Model:    zhipuai.Whisper1,
 			FilePath: "recording.mp3",
 		},
 	)
@@ -188,14 +188,14 @@ func ExampleClient_CreateTranslation() {
 }
 
 func ExampleClient_CreateImage() {
-	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+	client := zhipuai.NewClient(os.Getenv("zhipuai_API_KEY"))
 
 	respURL, err := client.CreateImage(
 		context.Background(),
-		openai.ImageRequest{
+		zhipuai.ImageRequest{
 			Prompt:         "Parrot on a skateboard performs a trick, cartoon style, natural light, high detail",
-			Size:           openai.CreateImageSize256x256,
-			ResponseFormat: openai.CreateImageResponseFormatURL,
+			Size:           zhipuai.CreateImageSize256x256,
+			ResponseFormat: zhipuai.CreateImageResponseFormatURL,
 			N:              1,
 		},
 	)
@@ -207,14 +207,14 @@ func ExampleClient_CreateImage() {
 }
 
 func ExampleClient_CreateImage_base64() {
-	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+	client := zhipuai.NewClient(os.Getenv("zhipuai_API_KEY"))
 
 	resp, err := client.CreateImage(
 		context.Background(),
-		openai.ImageRequest{
+		zhipuai.ImageRequest{
 			Prompt:         "Portrait of a humanoid parrot in a classic costume, high detail, realistic light, unreal engine",
-			Size:           openai.CreateImageSize512x512,
-			ResponseFormat: openai.CreateImageResponseFormatB64JSON,
+			Size:           zhipuai.CreateImageSize512x512,
+			ResponseFormat: zhipuai.CreateImageResponseFormatB64JSON,
 			N:              1,
 		},
 	)
@@ -246,8 +246,8 @@ func ExampleClient_CreateImage_base64() {
 }
 
 func ExampleClientConfig_clientWithProxy() {
-	config := openai.DefaultConfig(os.Getenv("OPENAI_API_KEY"))
-	port := os.Getenv("OPENAI_PROXY_PORT")
+	config := zhipuai.DefaultConfig(os.Getenv("zhipuai_API_KEY"))
+	port := os.Getenv("zhipuai_PROXY_PORT")
 	proxyURL, err := url.Parse(fmt.Sprintf("http://localhost:%s", port))
 	if err != nil {
 		panic(err)
@@ -259,24 +259,24 @@ func ExampleClientConfig_clientWithProxy() {
 		Transport: transport,
 	}
 
-	client := openai.NewClientWithConfig(config)
+	client := zhipuai.NewClientWithConfig(config)
 
 	client.CreateChatCompletion( //nolint:errcheck // outside of the scope of this example.
 		context.Background(),
-		openai.ChatCompletionRequest{
+		zhipuai.ChatCompletionRequest{
 			// etc...
 		},
 	)
 }
 
 func Example_chatbot() {
-	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+	client := zhipuai.NewClient(os.Getenv("zhipuai_API_KEY"))
 
-	req := openai.ChatCompletionRequest{
-		Model: openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
+	req := zhipuai.ChatCompletionRequest{
+		Model: zhipuai.GPT3Dot5Turbo,
+		Messages: []zhipuai.ChatCompletionMessage{
 			{
-				Role:    openai.ChatMessageRoleSystem,
+				Role:    zhipuai.ChatMessageRoleSystem,
 				Content: "you are a helpful chatbot",
 			},
 		},
@@ -286,8 +286,8 @@ func Example_chatbot() {
 	fmt.Print("> ")
 	s := bufio.NewScanner(os.Stdin)
 	for s.Scan() {
-		req.Messages = append(req.Messages, openai.ChatCompletionMessage{
-			Role:    openai.ChatMessageRoleUser,
+		req.Messages = append(req.Messages, zhipuai.ChatCompletionMessage{
+			Role:    zhipuai.ChatMessageRoleUser,
 			Content: s.Text(),
 		})
 		resp, err := client.CreateChatCompletion(context.Background(), req)
@@ -302,18 +302,18 @@ func Example_chatbot() {
 }
 
 func ExampleDefaultAzureConfig() {
-	azureKey := os.Getenv("AZURE_OPENAI_API_KEY")       // Your azure API key
-	azureEndpoint := os.Getenv("AZURE_OPENAI_ENDPOINT") // Your azure OpenAI endpoint
-	config := openai.DefaultAzureConfig(azureKey, azureEndpoint)
-	client := openai.NewClientWithConfig(config)
+	azureKey := os.Getenv("AZURE_zhipuai_API_KEY")       // Your azure API key
+	azureEndpoint := os.Getenv("AZURE_zhipuai_ENDPOINT") // Your azure zhipuai endpoint
+	config := zhipuai.DefaultAzureConfig(azureKey, azureEndpoint)
+	client := zhipuai.NewClientWithConfig(config)
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
-		openai.ChatCompletionRequest{
-			Model: openai.GPT3Dot5Turbo,
-			Messages: []openai.ChatCompletionMessage{
+		zhipuai.ChatCompletionRequest{
+			Model: zhipuai.GPT3Dot5Turbo,
+			Messages: []zhipuai.ChatCompletionMessage{
 				{
-					Role:    openai.ChatMessageRoleUser,
-					Content: "Hello Azure OpenAI!",
+					Role:    zhipuai.ChatMessageRoleUser,
+					Content: "Hello Azure zhipuai!",
 				},
 			},
 		},
@@ -328,10 +328,10 @@ func ExampleDefaultAzureConfig() {
 
 // Open-AI maintains clear documentation on how to handle API errors.
 //
-// see: https://platform.openai.com/docs/guides/error-codes/api-errors
+// see: https://platform.zhipuai.com/docs/guides/error-codes/api-errors
 func ExampleAPIError() {
 	var err error // Assume this is the error you are checking.
-	e := &openai.APIError{}
+	e := &zhipuai.APIError{}
 	if errors.As(err, &e) {
 		switch e.HTTPStatusCode {
 		case 401:
@@ -339,7 +339,7 @@ func ExampleAPIError() {
 		case 429:
 		// rate limiting or engine overload (wait and retry)
 		case 500:
-		// openai server error (retry)
+		// zhipuai server error (retry)
 		default:
 			// unhandled
 		}

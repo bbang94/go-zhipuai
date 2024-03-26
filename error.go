@@ -1,4 +1,4 @@
-package openai
+package zhipuai
 
 import (
 	"encoding/json"
@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-// APIError provides error information returned by the OpenAI API.
-// InnerError struct is only valid for Azure OpenAI Service.
+// APIError provides error information returned by the zhipuai API.
+// InnerError struct is only valid for Azure zhipuai Service.
 type APIError struct {
 	Code           any         `json:"code,omitempty"`
 	Message        string      `json:"message"`
@@ -17,7 +17,7 @@ type APIError struct {
 	InnerError     *InnerError `json:"innererror,omitempty"`
 }
 
-// InnerError Azure Content filtering. Only valid for Azure OpenAI Service.
+// InnerError Azure Content filtering. Only valid for Azure zhipuai Service.
 type InnerError struct {
 	Code                 string               `json:"code,omitempty"`
 	ContentFilterResults ContentFilterResults `json:"content_filter_result,omitempty"`
@@ -51,7 +51,7 @@ func (e *APIError) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(rawMap["message"], &e.Message)
 	if err != nil {
 		// If the parameter field of a function call is invalid as a JSON schema
-		// refs: https://github.com/sashabaranov/go-openai/issues/381
+		// refs: https://github.com/bbang94/go-zhipuai/issues/381
 		var messages []string
 		err = json.Unmarshal(rawMap["message"], &messages)
 		if err != nil {
@@ -60,8 +60,8 @@ func (e *APIError) UnmarshalJSON(data []byte) (err error) {
 		e.Message = strings.Join(messages, ", ")
 	}
 
-	// optional fields for azure openai
-	// refs: https://github.com/sashabaranov/go-openai/issues/343
+	// optional fields for azure zhipuai
+	// refs: https://github.com/bbang94/go-zhipuai/issues/343
 	if _, ok := rawMap["type"]; ok {
 		err = json.Unmarshal(rawMap["type"], &e.Type)
 		if err != nil {

@@ -15,5 +15,5 @@
 # vendor/
 
 # Auth token for tests
-.openai-token
+.zhipuai-token
 .idea

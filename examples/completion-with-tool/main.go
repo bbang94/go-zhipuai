@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/jsonschema"
+	"github.com/bbang94/go-zhipuai"
+	"github.com/bbang94/go-zhipuai/jsonschema"
 )
 
 func main() {
 	ctx := context.Background()
-	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+	client := zhipuai.NewClient(os.Getenv("zhipuai_API_KEY"))
 
 	// describe the function & its inputs
 	params := jsonschema.Definition{
@@ -28,27 +28,27 @@ func main() {
 		},
 		Required: []string{"location"},
 	}
-	f := openai.FunctionDefinition{
+	f := zhipuai.FunctionDefinition{
 		Name:        "get_current_weather",
 		Description: "Get the current weather in a given location",
 		Parameters:  params,
 	}
-	t := openai.Tool{
-		Type:     openai.ToolTypeFunction,
+	t := zhipuai.Tool{
+		Type:     zhipuai.ToolTypeFunction,
 		Function: &f,
 	}
 
 	// simulate user asking a question that requires the function
-	dialogue := []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleUser, Content: "What is the weather in Boston today?"},
+	dialogue := []zhipuai.ChatCompletionMessage{
+		{Role: zhipuai.ChatMessageRoleUser, Content: "What is the weather in Boston today?"},
 	}
-	fmt.Printf("Asking OpenAI '%v' and providing it a '%v()' function...\n",
+	fmt.Printf("Asking zhipuai '%v' and providing it a '%v()' function...\n",
 		dialogue[0].Content, f.Name)
 	resp, err := client.CreateChatCompletion(ctx,
-		openai.ChatCompletionRequest{
-			Model:    openai.GPT4TurboPreview,
+		zhipuai.ChatCompletionRequest{
+			Model:    zhipuai.GPT4TurboPreview,
 			Messages: dialogue,
-			Tools:    []openai.Tool{t},
+			Tools:    []zhipuai.Tool{t},
 		},
 	)
 	if err != nil || len(resp.Choices) != 1 {
@@ -62,23 +62,23 @@ func main() {
 		return
 	}
 
-	// simulate calling the function & responding to OpenAI
+	// simulate calling the function & responding to zhipuai
 	dialogue = append(dialogue, msg)
-	fmt.Printf("OpenAI called us back wanting to invoke our function '%v' with params '%v'\n",
+	fmt.Printf("zhipuai called us back wanting to invoke our function '%v' with params '%v'\n",
 		msg.ToolCalls[0].Function.Name, msg.ToolCalls[0].Function.Arguments)
-	dialogue = append(dialogue, openai.ChatCompletionMessage{
-		Role:       openai.ChatMessageRoleTool,
+	dialogue = append(dialogue, zhipuai.ChatCompletionMessage{
+		Role:       zhipuai.ChatMessageRoleTool,
 		Content:    "Sunny and 80 degrees.",
 		Name:       msg.ToolCalls[0].Function.Name,
 		ToolCallID: msg.ToolCalls[0].ID,
 	})
-	fmt.Printf("Sending OpenAI our '%v()' function's response and requesting the reply to the original question...\n",
+	fmt.Printf("Sending zhipuai our '%v()' function's response and requesting the reply to the original question...\n",
 		f.Name)
 	resp, err = client.CreateChatCompletion(ctx,
-		openai.ChatCompletionRequest{
-			Model:    openai.GPT4TurboPreview,
+		zhipuai.ChatCompletionRequest{
+			Model:    zhipuai.GPT4TurboPreview,
 			Messages: dialogue,
-			Tools:    []openai.Tool{t},
+			Tools:    []zhipuai.Tool{t},
 		},
 	)
 	if err != nil || len(resp.Choices) != 1 {
@@ -87,8 +87,8 @@ func main() {
 		return
 	}
 
-	// display OpenAI's response to the original question utilizing our function
+	// display zhipuai's response to the original question utilizing our function
 	msg = resp.Choices[0].Message
-	fmt.Printf("OpenAI answered the original request with: %v\n",
+	fmt.Printf("zhipuai answered the original request with: %v\n",
 		msg.Content)
 }

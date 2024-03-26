@@ -1,4 +1,4 @@
-package openai_test
+package zhipuai_test
 
 import (
 	"context"
@@ -9,15 +9,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/bbang94/go-zhipuai"
+	"github.com/bbang94/go-zhipuai/internal/test/checks"
 )
 
 const testFineTuneModelID = "fine-tune-model-id"
 
 // TestListModels Tests the list models endpoint of the API using the mocked server.
 func TestListModels(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/models", handleListModelsEndpoint)
 	_, err := client.ListModels(context.Background())
@@ -27,20 +27,20 @@ func TestListModels(t *testing.T) {
 func TestAzureListModels(t *testing.T) {
 	client, server, teardown := setupAzureTestServer()
 	defer teardown()
-	server.RegisterHandler("/openai/models", handleListModelsEndpoint)
+	server.RegisterHandler("/zhipuai/models", handleListModelsEndpoint)
 	_, err := client.ListModels(context.Background())
 	checks.NoError(t, err, "ListModels error")
 }
 
 // handleListModelsEndpoint Handles the list models endpoint by the test server.
 func handleListModelsEndpoint(w http.ResponseWriter, _ *http.Request) {
-	resBytes, _ := json.Marshal(openai.ModelsList{})
+	resBytes, _ := json.Marshal(zhipuai.ModelsList{})
 	fmt.Fprintln(w, string(resBytes))
 }
 
 // TestGetModel Tests the retrieve model endpoint of the API using the mocked server.
 func TestGetModel(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/models/text-davinci-003", handleGetModelEndpoint)
 	_, err := client.GetModel(context.Background(), "text-davinci-003")
@@ -50,19 +50,19 @@ func TestGetModel(t *testing.T) {
 func TestAzureGetModel(t *testing.T) {
 	client, server, teardown := setupAzureTestServer()
 	defer teardown()
-	server.RegisterHandler("/openai/models/text-davinci-003", handleGetModelEndpoint)
+	server.RegisterHandler("/zhipuai/models/text-davinci-003", handleGetModelEndpoint)
 	_, err := client.GetModel(context.Background(), "text-davinci-003")
 	checks.NoError(t, err, "GetModel error")
 }
 
 // handleGetModelsEndpoint Handles the get model endpoint by the test server.
 func handleGetModelEndpoint(w http.ResponseWriter, _ *http.Request) {
-	resBytes, _ := json.Marshal(openai.Model{})
+	resBytes, _ := json.Marshal(zhipuai.Model{})
 	fmt.Fprintln(w, string(resBytes))
 }
 
 func TestGetModelReturnTimeoutError(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/models/text-davinci-003", func(http.ResponseWriter, *http.Request) {
 		time.Sleep(10 * time.Nanosecond)
@@ -81,7 +81,7 @@ func TestGetModelReturnTimeoutError(t *testing.T) {
 }
 
 func TestDeleteFineTuneModel(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/models/"+testFineTuneModelID, handleDeleteFineTuneModelEndpoint)
 	_, err := client.DeleteFineTuneModel(context.Background(), testFineTuneModelID)
@@ -89,6 +89,6 @@ func TestDeleteFineTuneModel(t *testing.T) {
 }
 
 func handleDeleteFineTuneModelEndpoint(w http.ResponseWriter, _ *http.Request) {
-	resBytes, _ := json.Marshal(openai.FineTuneModelDeleteResponse{})
+	resBytes, _ := json.Marshal(zhipuai.FineTuneModelDeleteResponse{})
 	fmt.Fprintln(w, string(resBytes))
 }

@@ -1,12 +1,12 @@
-package openai_test
+package zhipuai_test
 
 import (
 	"bytes"
 	"errors"
 	"testing"
 
-	utils "github.com/sashabaranov/go-openai/internal"
-	"github.com/sashabaranov/go-openai/internal/test"
+	utils "github.com/bbang94/go-zhipuai/internal"
+	"github.com/bbang94/go-zhipuai/internal/test"
 )
 
 func TestErrorAccumulatorBytes(t *testing.T) {

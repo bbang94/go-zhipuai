@@ -1,4 +1,4 @@
-package openai
+package zhipuai
 
 import (
 	"bytes"
@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-// Image sizes defined by the OpenAI API.
+// Image sizes defined by the zhipuai API.
 const (
 	CreateImageSize256x256   = "256x256"
 	CreateImageSize512x512   = "512x512"

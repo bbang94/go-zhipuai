@@ -1,4 +1,4 @@
-package openai
+package zhipuai
 
 import (
 	"context"
@@ -144,7 +144,7 @@ type EmbeddingRequestConverter interface {
 
 // EmbeddingEncodingFormat is the format of the embeddings data.
 // Currently, only "float" and "base64" are supported, however, "base64" is not officially documented.
-// If not specified OpenAI will use "float".
+// If not specified zhipuai will use "float".
 type EmbeddingEncodingFormat string
 
 const (
@@ -178,11 +178,11 @@ type EmbeddingRequestStrings struct {
 	// ID of the model to use. You can use the List models API to see all of your available models,
 	// or see our Model overview for descriptions of them.
 	Model EmbeddingModel `json:"model"`
-	// A unique identifier representing your end-user, which will help OpenAI to monitor and detect abuse.
+	// A unique identifier representing your end-user, which will help zhipuai to monitor and detect abuse.
 	User string `json:"user"`
 	// EmbeddingEncodingFormat is the format of the embeddings data.
 	// Currently, only "float" and "base64" are supported, however, "base64" is not officially documented.
-	// If not specified OpenAI will use "float".
+	// If not specified zhipuai will use "float".
 	EncodingFormat EmbeddingEncodingFormat `json:"encoding_format,omitempty"`
 	// Dimensions The number of dimensions the resulting output embeddings should have.
 	// Only supported in text-embedding-3 and later models.
@@ -210,11 +210,11 @@ type EmbeddingRequestTokens struct {
 	// ID of the model to use. You can use the List models API to see all of your available models,
 	// or see our Model overview for descriptions of them.
 	Model EmbeddingModel `json:"model"`
-	// A unique identifier representing your end-user, which will help OpenAI to monitor and detect abuse.
+	// A unique identifier representing your end-user, which will help zhipuai to monitor and detect abuse.
 	User string `json:"user"`
 	// EmbeddingEncodingFormat is the format of the embeddings data.
 	// Currently, only "float" and "base64" are supported, however, "base64" is not officially documented.
-	// If not specified OpenAI will use "float".
+	// If not specified zhipuai will use "float".
 	EncodingFormat EmbeddingEncodingFormat `json:"encoding_format,omitempty"`
 	// Dimensions The number of dimensions the resulting output embeddings should have.
 	// Only supported in text-embedding-3 and later models.
@@ -232,7 +232,7 @@ func (r EmbeddingRequestTokens) Convert() EmbeddingRequest {
 }
 
 // CreateEmbeddings returns an EmbeddingResponse which will contain an Embedding for every item in |body.Input|.
-// https://beta.openai.com/docs/api-reference/embeddings/create
+// https://beta.zhipuai.com/docs/api-reference/embeddings/create
 //
 // Body should be of type EmbeddingRequestStrings for embedding strings or EmbeddingRequestTokens
 // for embedding groups of text already converted to tokens.

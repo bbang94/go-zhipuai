@@ -1,4 +1,4 @@
-package openai
+package zhipuai
 
 import (
 	"fmt"

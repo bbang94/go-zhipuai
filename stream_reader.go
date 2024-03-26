@@ -1,4 +1,4 @@
-package openai
+package zhipuai
 
 import (
 	"bufio"
@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	utils "github.com/sashabaranov/go-openai/internal"
+	utils "github.com/bbang94/go-zhipuai/internal"
 )
 
 var (

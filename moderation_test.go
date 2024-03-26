@@ -1,4 +1,4 @@
-package openai_test
+package zhipuai_test
 
 import (
 	"context"
@@ -11,17 +11,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/bbang94/go-zhipuai"
+	"github.com/bbang94/go-zhipuai/internal/test/checks"
 )
 
 // TestModeration Tests the moderations endpoint of the API using the mocked server.
 func TestModerations(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/moderations", handleModerationEndpoint)
-	_, err := client.Moderations(context.Background(), openai.ModerationRequest{
-		Model: openai.ModerationTextStable,
+	_, err := client.Moderations(context.Background(), zhipuai.ModerationRequest{
+		Model: zhipuai.ModerationTextStable,
 		Input: "I want to kill them.",
 	})
 	checks.NoError(t, err, "Moderation error")
@@ -34,16 +34,16 @@ func TestModerationsWithDifferentModelOptions(t *testing.T) {
 		expect error
 	}
 	modelOptions = append(modelOptions,
-		getModerationModelTestOption(openai.GPT3Dot5Turbo, openai.ErrModerationInvalidModel),
-		getModerationModelTestOption(openai.ModerationTextStable, nil),
-		getModerationModelTestOption(openai.ModerationTextLatest, nil),
+		getModerationModelTestOption(zhipuai.GPT3Dot5Turbo, zhipuai.ErrModerationInvalidModel),
+		getModerationModelTestOption(zhipuai.ModerationTextStable, nil),
+		getModerationModelTestOption(zhipuai.ModerationTextLatest, nil),
 		getModerationModelTestOption("", nil),
 	)
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/moderations", handleModerationEndpoint)
 	for _, modelTest := range modelOptions {
-		_, err := client.Moderations(context.Background(), openai.ModerationRequest{
+		_, err := client.Moderations(context.Background(), zhipuai.ModerationRequest{
 			Model: modelTest.model,
 			Input: "I want to kill them.",
 		})
@@ -71,63 +71,63 @@ func handleModerationEndpoint(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
-	var moderationReq openai.ModerationRequest
+	var moderationReq zhipuai.ModerationRequest
 	if moderationReq, err = getModerationBody(r); err != nil {
 		http.Error(w, "could not read request", http.StatusInternalServerError)
 		return
 	}
 
-	resCat := openai.ResultCategories{}
-	resCatScore := openai.ResultCategoryScores{}
+	resCat := zhipuai.ResultCategories{}
+	resCatScore := zhipuai.ResultCategoryScores{}
 	switch {
 	case strings.Contains(moderationReq.Input, "hate"):
-		resCat = openai.ResultCategories{Hate: true}
-		resCatScore = openai.ResultCategoryScores{Hate: 1}
+		resCat = zhipuai.ResultCategories{Hate: true}
+		resCatScore = zhipuai.ResultCategoryScores{Hate: 1}
 
 	case strings.Contains(moderationReq.Input, "hate more"):
-		resCat = openai.ResultCategories{HateThreatening: true}
-		resCatScore = openai.ResultCategoryScores{HateThreatening: 1}
+		resCat = zhipuai.ResultCategories{HateThreatening: true}
+		resCatScore = zhipuai.ResultCategoryScores{HateThreatening: 1}
 
 	case strings.Contains(moderationReq.Input, "harass"):
-		resCat = openai.ResultCategories{Harassment: true}
-		resCatScore = openai.ResultCategoryScores{Harassment: 1}
+		resCat = zhipuai.ResultCategories{Harassment: true}
+		resCatScore = zhipuai.ResultCategoryScores{Harassment: 1}
 
 	case strings.Contains(moderationReq.Input, "harass hard"):
-		resCat = openai.ResultCategories{Harassment: true}
-		resCatScore = openai.ResultCategoryScores{HarassmentThreatening: 1}
+		resCat = zhipuai.ResultCategories{Harassment: true}
+		resCatScore = zhipuai.ResultCategoryScores{HarassmentThreatening: 1}
 
 	case strings.Contains(moderationReq.Input, "suicide"):
-		resCat = openai.ResultCategories{SelfHarm: true}
-		resCatScore = openai.ResultCategoryScores{SelfHarm: 1}
+		resCat = zhipuai.ResultCategories{SelfHarm: true}
+		resCatScore = zhipuai.ResultCategoryScores{SelfHarm: 1}
 
 	case strings.Contains(moderationReq.Input, "wanna suicide"):
-		resCat = openai.ResultCategories{SelfHarmIntent: true}
-		resCatScore = openai.ResultCategoryScores{SelfHarm: 1}
+		resCat = zhipuai.ResultCategories{SelfHarmIntent: true}
+		resCatScore = zhipuai.ResultCategoryScores{SelfHarm: 1}
 
 	case strings.Contains(moderationReq.Input, "drink bleach"):
-		resCat = openai.ResultCategories{SelfHarmInstructions: true}
-		resCatScore = openai.ResultCategoryScores{SelfHarmInstructions: 1}
+		resCat = zhipuai.ResultCategories{SelfHarmInstructions: true}
+		resCatScore = zhipuai.ResultCategoryScores{SelfHarmInstructions: 1}
 
 	case strings.Contains(moderationReq.Input, "porn"):
-		resCat = openai.ResultCategories{Sexual: true}
-		resCatScore = openai.ResultCategoryScores{Sexual: 1}
+		resCat = zhipuai.ResultCategories{Sexual: true}
+		resCatScore = zhipuai.ResultCategoryScores{Sexual: 1}
 
 	case strings.Contains(moderationReq.Input, "child porn"):
-		resCat = openai.ResultCategories{SexualMinors: true}
-		resCatScore = openai.ResultCategoryScores{SexualMinors: 1}
+		resCat = zhipuai.ResultCategories{SexualMinors: true}
+		resCatScore = zhipuai.ResultCategoryScores{SexualMinors: 1}
 
 	case strings.Contains(moderationReq.Input, "kill"):
-		resCat = openai.ResultCategories{Violence: true}
-		resCatScore = openai.ResultCategoryScores{Violence: 1}
+		resCat = zhipuai.ResultCategories{Violence: true}
+		resCatScore = zhipuai.ResultCategoryScores{Violence: 1}
 
 	case strings.Contains(moderationReq.Input, "corpse"):
-		resCat = openai.ResultCategories{ViolenceGraphic: true}
-		resCatScore = openai.ResultCategoryScores{ViolenceGraphic: 1}
+		resCat = zhipuai.ResultCategories{ViolenceGraphic: true}
+		resCatScore = zhipuai.ResultCategoryScores{ViolenceGraphic: 1}
 	}
 
-	result := openai.Result{Categories: resCat, CategoryScores: resCatScore, Flagged: true}
+	result := zhipuai.Result{Categories: resCat, CategoryScores: resCatScore, Flagged: true}
 
-	res := openai.ModerationResponse{
+	res := zhipuai.ModerationResponse{
 		ID:    strconv.Itoa(int(time.Now().Unix())),
 		Model: moderationReq.Model,
 	}
@@ -138,16 +138,16 @@ func handleModerationEndpoint(w http.ResponseWriter, r *http.Request) {
 }
 
 // getModerationBody Returns the body of the request to do a moderation.
-func getModerationBody(r *http.Request) (openai.ModerationRequest, error) {
-	moderation := openai.ModerationRequest{}
+func getModerationBody(r *http.Request) (zhipuai.ModerationRequest, error) {
+	moderation := zhipuai.ModerationRequest{}
 	// read the request body
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
-		return openai.ModerationRequest{}, err
+		return zhipuai.ModerationRequest{}, err
 	}
 	err = json.Unmarshal(reqBody, &moderation)
 	if err != nil {
-		return openai.ModerationRequest{}, err
+		return zhipuai.ModerationRequest{}, err
 	}
 	return moderation, nil
 }

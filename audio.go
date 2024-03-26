@@ -1,4 +1,4 @@
-package openai
+package zhipuai
 
 import (
 	"bytes"
@@ -8,10 +8,10 @@ import (
 	"net/http"
 	"os"
 
-	utils "github.com/sashabaranov/go-openai/internal"
+	utils "github.com/bbang94/go-zhipuai/internal"
 )
 
-// Whisper Defines the models provided by OpenAI to use when processing audio with OpenAI.
+// Whisper Defines the models provided by zhipuai to use when processing audio with zhipuai.
 const (
 	Whisper1 = "whisper-1"
 )

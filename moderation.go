@@ -1,4 +1,4 @@
-package openai
+package zhipuai
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// The moderation endpoint is a tool you can use to check whether content complies with OpenAI's usage policies.
+// The moderation endpoint is a tool you can use to check whether content complies with zhipuai's usage policies.
 // Developers can thus identify content that our usage policies prohibits and take action, for instance by filtering it.
 
 // The default is text-moderation-latest which will be automatically upgraded over time.

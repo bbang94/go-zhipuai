@@ -5,18 +5,18 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sashabaranov/go-openai"
+	"github.com/bbang94/go-zhipuai"
 )
 
 func main() {
-	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+	client := zhipuai.NewClient(os.Getenv("zhipuai_API_KEY"))
 
 	respUrl, err := client.CreateImage(
 		context.Background(),
-		openai.ImageRequest{
+		zhipuai.ImageRequest{
 			Prompt:         "Parrot on a skateboard performs a trick, cartoon style, natural light, high detail",
-			Size:           openai.CreateImageSize256x256,
-			ResponseFormat: openai.CreateImageResponseFormatURL,
+			Size:           zhipuai.CreateImageSize256x256,
+			ResponseFormat: zhipuai.CreateImageResponseFormatURL,
 			N:              1,
 		},
 	)

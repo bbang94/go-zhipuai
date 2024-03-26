@@ -1,4 +1,4 @@
-package openai
+package zhipuai
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 const (
 	assistantsSuffix      = "/assistants"
 	assistantsFilesSuffix = "/files"
-	openaiAssistantsV1    = "assistants=v1"
+	zhipuaiAssistantsV1   = "assistants=v1"
 )
 
 type Assistant struct {

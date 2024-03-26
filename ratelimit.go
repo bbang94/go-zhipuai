@@ -1,4 +1,4 @@
-package openai
+package zhipuai
 
 import (
 	"net/http"
@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// RateLimitHeaders struct represents Openai rate limits headers.
+// RateLimitHeaders struct represents zhipuai rate limits headers.
 type RateLimitHeaders struct {
 	LimitRequests     int       `json:"x-ratelimit-limit-requests"`
 	LimitTokens       int       `json:"x-ratelimit-limit-tokens"`

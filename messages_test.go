@@ -1,4 +1,4 @@
-package openai_test
+package zhipuai_test
 
 import (
 	"context"
@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/bbang94/go-zhipuai"
+	"github.com/bbang94/go-zhipuai/internal/test/checks"
 )
 
 var emptyStr = ""
@@ -19,7 +19,7 @@ func TestMessages(t *testing.T) {
 	messageID := "msg_abc123"
 	fileID := "file_abc123"
 
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 
 	server.RegisterHandler(
@@ -28,7 +28,7 @@ func TestMessages(t *testing.T) {
 			switch r.Method {
 			case http.MethodGet:
 				resBytes, _ := json.Marshal(
-					openai.MessageFile{
+					zhipuai.MessageFile{
 						ID:        fileID,
 						Object:    "thread.message.file",
 						CreatedAt: 1699061776,
@@ -47,7 +47,7 @@ func TestMessages(t *testing.T) {
 			switch r.Method {
 			case http.MethodGet:
 				resBytes, _ := json.Marshal(
-					openai.MessageFilesList{MessageFiles: []openai.MessageFile{{
+					zhipuai.MessageFilesList{MessageFiles: []zhipuai.MessageFile{{
 						ID:        fileID,
 						Object:    "thread.message.file",
 						CreatedAt: 0,
@@ -70,15 +70,15 @@ func TestMessages(t *testing.T) {
 				checks.NoError(t, err, "unable to decode metadata in modify message call")
 
 				resBytes, _ := json.Marshal(
-					openai.Message{
+					zhipuai.Message{
 						ID:        messageID,
 						Object:    "thread.message",
 						CreatedAt: 1234567890,
 						ThreadID:  threadID,
 						Role:      "user",
-						Content: []openai.MessageContent{{
+						Content: []zhipuai.MessageContent{{
 							Type: "text",
-							Text: &openai.MessageText{
+							Text: &zhipuai.MessageText{
 								Value:       "How does AI work?",
 								Annotations: nil,
 							},
@@ -91,15 +91,15 @@ func TestMessages(t *testing.T) {
 				fmt.Fprintln(w, string(resBytes))
 			case http.MethodGet:
 				resBytes, _ := json.Marshal(
-					openai.Message{
+					zhipuai.Message{
 						ID:        messageID,
 						Object:    "thread.message",
 						CreatedAt: 1234567890,
 						ThreadID:  threadID,
 						Role:      "user",
-						Content: []openai.MessageContent{{
+						Content: []zhipuai.MessageContent{{
 							Type: "text",
-							Text: &openai.MessageText{
+							Text: &zhipuai.MessageText{
 								Value:       "How does AI work?",
 								Annotations: nil,
 							},
@@ -121,15 +121,15 @@ func TestMessages(t *testing.T) {
 		func(w http.ResponseWriter, r *http.Request) {
 			switch r.Method {
 			case http.MethodPost:
-				resBytes, _ := json.Marshal(openai.Message{
+				resBytes, _ := json.Marshal(zhipuai.Message{
 					ID:        messageID,
 					Object:    "thread.message",
 					CreatedAt: 1234567890,
 					ThreadID:  threadID,
 					Role:      "user",
-					Content: []openai.MessageContent{{
+					Content: []zhipuai.MessageContent{{
 						Type: "text",
-						Text: &openai.MessageText{
+						Text: &zhipuai.MessageText{
 							Value:       "How does AI work?",
 							Annotations: nil,
 						},
@@ -141,17 +141,17 @@ func TestMessages(t *testing.T) {
 				})
 				fmt.Fprintln(w, string(resBytes))
 			case http.MethodGet:
-				resBytes, _ := json.Marshal(openai.MessagesList{
+				resBytes, _ := json.Marshal(zhipuai.MessagesList{
 					Object: "list",
-					Messages: []openai.Message{{
+					Messages: []zhipuai.Message{{
 						ID:        messageID,
 						Object:    "thread.message",
 						CreatedAt: 1234567890,
 						ThreadID:  threadID,
 						Role:      "user",
-						Content: []openai.MessageContent{{
+						Content: []zhipuai.MessageContent{{
 							Type: "text",
-							Text: &openai.MessageText{
+							Text: &zhipuai.MessageText{
 								Value:       "How does AI work?",
 								Annotations: nil,
 							},
@@ -175,8 +175,8 @@ func TestMessages(t *testing.T) {
 	ctx := context.Background()
 
 	// static assertion of return type
-	var msg openai.Message
-	msg, err := client.CreateMessage(ctx, threadID, openai.MessageRequest{
+	var msg zhipuai.Message
+	msg, err := client.CreateMessage(ctx, threadID, zhipuai.MessageRequest{
 		Role:     "user",
 		Content:  "How does AI work?",
 		FileIds:  nil,
@@ -187,7 +187,7 @@ func TestMessages(t *testing.T) {
 		t.Fatalf("unexpected message id: '%s'", msg.ID)
 	}
 
-	var msgs openai.MessagesList
+	var msgs zhipuai.MessagesList
 	msgs, err = client.ListMessage(ctx, threadID, nil, nil, nil, nil)
 	checks.NoError(t, err, "ListMessages error")
 	if len(msgs.Messages) != 1 {
@@ -221,14 +221,14 @@ func TestMessages(t *testing.T) {
 	}
 
 	// message files
-	var msgFile openai.MessageFile
+	var msgFile zhipuai.MessageFile
 	msgFile, err = client.RetrieveMessageFile(ctx, threadID, messageID, fileID)
 	checks.NoError(t, err, "RetrieveMessageFile error")
 	if msgFile.ID != fileID {
 		t.Fatalf("unexpected message file id: '%s'", msgFile.ID)
 	}
 
-	var msgFiles openai.MessageFilesList
+	var msgFiles zhipuai.MessageFilesList
 	msgFiles, err = client.ListMessageFiles(ctx, threadID, messageID)
 	checks.NoError(t, err, "RetrieveMessageFile error")
 	if len(msgFiles.MessageFiles) != 1 {

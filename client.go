@@ -1,4 +1,4 @@
-package openai
+package zhipuai
 
 import (
 	"bufio"
@@ -13,10 +13,10 @@ import (
 	"strings"
 	"time"
 
-	utils "github.com/sashabaranov/go-openai/internal"
+	utils "github.com/bbang94/go-zhipuai/internal"
 )
 
-// Client is OpenAI GPT-3 API client.
+// Client is zhipuai GPT-3 API client.
 type Client struct {
 	config            ClientConfig
 	cache             *cache.Cache
@@ -42,14 +42,14 @@ func (h *httpHeader) GetRateLimitHeaders() RateLimitHeaders {
 	return newRateLimitHeaders(h.Header())
 }
 
-// NewClient creates new OpenAI API client.
+// NewClient creates new zhipuai API client.
 func NewClient(authToken string) *Client {
 	config := DefaultConfig(authToken)
 
 	return NewClientWithConfig(config)
 }
 
-// NewClientWithConfig creates new OpenAI API client for specified config.
+// NewClientWithConfig creates new zhipuai API client for specified config.
 func NewClientWithConfig(config ClientConfig) *Client {
 	cacheClient := cache.New(
 		time.Duration(CacheTTLSeconds)*time.Second,
@@ -64,7 +64,7 @@ func NewClientWithConfig(config ClientConfig) *Client {
 	}
 }
 
-// NewOrgClient creates new OpenAI API client for specified Organization ID.
+// NewOrgClient creates new zhipuai API client for specified Organization ID.
 //
 // Deprecated: Please use NewClientWithConfig.
 func NewOrgClient(authToken, org string) *Client {
@@ -94,7 +94,7 @@ func withContentType(contentType string) requestOption {
 
 func withBetaAssistantV1() requestOption {
 	return func(args *requestOptions) {
-		args.header.Set("OpenAI-Beta", "assistants=v1")
+		args.header.Set("zhipuai-Beta", "assistants=v1")
 	}
 }
 
@@ -270,12 +270,12 @@ func decodeString(body io.Reader, output *string) error {
 // fullURL returns full URL for request.
 // args[0] is model name, if API type is Azure, model name is required to get deployment name.
 func (c *Client) fullURL(suffix string, args ...any) string {
-	// /openai/deployments/{model}/chat/completions?api-version={api_version}
+	// /zhipuai/deployments/{model}/chat/completions?api-version={api_version}
 	if c.config.APIType == APITypeAzure || c.config.APIType == APITypeAzureAD {
 		baseURL := c.config.BaseURL
 		baseURL = strings.TrimRight(baseURL, "/")
-		// if suffix is /models change to {endpoint}/openai/models?api-version=2022-12-01
-		// https://learn.microsoft.com/en-us/rest/api/cognitiveservices/azureopenaistable/models/list?tabs=HTTP
+		// if suffix is /models change to {endpoint}/zhipuai/models?api-version=2022-12-01
+		// https://learn.microsoft.com/en-us/rest/api/cognitiveservices/azurezhipuaistable/models/list?tabs=HTTP
 		if containsSubstr([]string{"/models", "/assistants", "/threads", "/files"}, suffix) {
 			return fmt.Sprintf("%s/%s%s?api-version=%s", baseURL, azureAPIPrefix, suffix, c.config.APIVersion)
 		}
@@ -292,7 +292,7 @@ func (c *Client) fullURL(suffix string, args ...any) string {
 		)
 	}
 
-	// c.config.APIType == APITypeOpenAI || c.config.APIType == ""
+	// c.config.APIType == APITypezhipuai || c.config.APIType == ""
 	return fmt.Sprintf("%s%s", c.config.BaseURL, suffix)
 }
 

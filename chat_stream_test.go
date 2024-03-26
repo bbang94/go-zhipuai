@@ -1,4 +1,4 @@
-package openai_test
+package zhipuai_test
 
 import (
 	"context"
@@ -10,34 +10,34 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/bbang94/go-zhipuai"
+	"github.com/bbang94/go-zhipuai/internal/test/checks"
 )
 
 func TestChatCompletionsStreamWrongModel(t *testing.T) {
-	config := openai.DefaultConfig("whatever")
+	config := zhipuai.DefaultConfig("whatever")
 	config.BaseURL = "http://localhost/v1"
-	client := openai.NewClientWithConfig(config)
+	client := zhipuai.NewClientWithConfig(config)
 	ctx := context.Background()
 
-	req := openai.ChatCompletionRequest{
+	req := zhipuai.ChatCompletionRequest{
 		MaxTokens: 5,
 		Model:     "ada",
-		Messages: []openai.ChatCompletionMessage{
+		Messages: []zhipuai.ChatCompletionMessage{
 			{
-				Role:    openai.ChatMessageRoleUser,
+				Role:    zhipuai.ChatMessageRoleUser,
 				Content: "Hello!",
 			},
 		},
 	}
 	_, err := client.CreateChatCompletionStream(ctx, req)
-	if !errors.Is(err, openai.ErrChatCompletionInvalidModel) {
+	if !errors.Is(err, zhipuai.ErrChatCompletionInvalidModel) {
 		t.Fatalf("CreateChatCompletion should return ErrChatCompletionInvalidModel, but returned: %v", err)
 	}
 }
 
 func TestCreateChatCompletionStream(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
@@ -61,12 +61,12 @@ func TestCreateChatCompletionStream(t *testing.T) {
 		checks.NoError(t, err, "Write error")
 	})
 
-	stream, err := client.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
+	stream, err := client.CreateChatCompletionStream(context.Background(), zhipuai.ChatCompletionRequest{
 		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
+		Model:     zhipuai.GPT3Dot5Turbo,
+		Messages: []zhipuai.ChatCompletionMessage{
 			{
-				Role:    openai.ChatMessageRoleUser,
+				Role:    zhipuai.ChatMessageRoleUser,
 				Content: "Hello!",
 			},
 		},
@@ -75,15 +75,15 @@ func TestCreateChatCompletionStream(t *testing.T) {
 	checks.NoError(t, err, "CreateCompletionStream returned error")
 	defer stream.Close()
 
-	expectedResponses := []openai.ChatCompletionStreamResponse{
+	expectedResponses := []zhipuai.ChatCompletionStreamResponse{
 		{
 			ID:      "1",
 			Object:  "completion",
 			Created: 1598069254,
-			Model:   openai.GPT3Dot5Turbo,
-			Choices: []openai.ChatCompletionStreamChoice{
+			Model:   zhipuai.GPT3Dot5Turbo,
+			Choices: []zhipuai.ChatCompletionStreamChoice{
 				{
-					Delta: openai.ChatCompletionStreamChoiceDelta{
+					Delta: zhipuai.ChatCompletionStreamChoiceDelta{
 						Content: "response1",
 					},
 					FinishReason: "max_tokens",
@@ -94,10 +94,10 @@ func TestCreateChatCompletionStream(t *testing.T) {
 			ID:      "2",
 			Object:  "completion",
 			Created: 1598069255,
-			Model:   openai.GPT3Dot5Turbo,
-			Choices: []openai.ChatCompletionStreamChoice{
+			Model:   zhipuai.GPT3Dot5Turbo,
+			Choices: []zhipuai.ChatCompletionStreamChoice{
 				{
-					Delta: openai.ChatCompletionStreamChoiceDelta{
+					Delta: zhipuai.ChatCompletionStreamChoiceDelta{
 						Content: "response2",
 					},
 					FinishReason: "max_tokens",
@@ -131,7 +131,7 @@ func TestCreateChatCompletionStream(t *testing.T) {
 }
 
 func TestCreateChatCompletionStreamError(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
@@ -156,12 +156,12 @@ func TestCreateChatCompletionStreamError(t *testing.T) {
 		checks.NoError(t, err, "Write error")
 	})
 
-	stream, err := client.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
+	stream, err := client.CreateChatCompletionStream(context.Background(), zhipuai.ChatCompletionRequest{
 		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
+		Model:     zhipuai.GPT3Dot5Turbo,
+		Messages: []zhipuai.ChatCompletionMessage{
 			{
-				Role:    openai.ChatMessageRoleUser,
+				Role:    zhipuai.ChatMessageRoleUser,
 				Content: "Hello!",
 			},
 		},
@@ -173,7 +173,7 @@ func TestCreateChatCompletionStreamError(t *testing.T) {
 	_, streamErr := stream.Recv()
 	checks.HasError(t, streamErr, "stream.Recv() did not return error")
 
-	var apiErr *openai.APIError
+	var apiErr *zhipuai.APIError
 	if !errors.As(streamErr, &apiErr) {
 		t.Errorf("stream.Recv() did not return APIError")
 	}
@@ -181,7 +181,7 @@ func TestCreateChatCompletionStreamError(t *testing.T) {
 }
 
 func TestCreateChatCompletionStreamWithHeaders(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
@@ -196,12 +196,12 @@ func TestCreateChatCompletionStreamWithHeaders(t *testing.T) {
 		checks.NoError(t, err, "Write error")
 	})
 
-	stream, err := client.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
+	stream, err := client.CreateChatCompletionStream(context.Background(), zhipuai.ChatCompletionRequest{
 		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
+		Model:     zhipuai.GPT3Dot5Turbo,
+		Messages: []zhipuai.ChatCompletionMessage{
 			{
-				Role:    openai.ChatMessageRoleUser,
+				Role:    zhipuai.ChatMessageRoleUser,
 				Content: "Hello!",
 			},
 		},
@@ -217,7 +217,7 @@ func TestCreateChatCompletionStreamWithHeaders(t *testing.T) {
 }
 
 func TestCreateChatCompletionStreamWithRatelimitHeaders(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
@@ -239,12 +239,12 @@ func TestCreateChatCompletionStreamWithRatelimitHeaders(t *testing.T) {
 		checks.NoError(t, err, "Write error")
 	})
 
-	stream, err := client.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
+	stream, err := client.CreateChatCompletionStream(context.Background(), zhipuai.ChatCompletionRequest{
 		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
+		Model:     zhipuai.GPT3Dot5Turbo,
+		Messages: []zhipuai.ChatCompletionMessage{
 			{
-				Role:    openai.ChatMessageRoleUser,
+				Role:    zhipuai.ChatMessageRoleUser,
 				Content: "Hello!",
 			},
 		},
@@ -262,7 +262,7 @@ func TestCreateChatCompletionStreamWithRatelimitHeaders(t *testing.T) {
 }
 
 func TestCreateChatCompletionStreamErrorWithDataPrefix(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
@@ -276,12 +276,12 @@ func TestCreateChatCompletionStreamErrorWithDataPrefix(t *testing.T) {
 		checks.NoError(t, err, "Write error")
 	})
 
-	stream, err := client.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
+	stream, err := client.CreateChatCompletionStream(context.Background(), zhipuai.ChatCompletionRequest{
 		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
+		Model:     zhipuai.GPT3Dot5Turbo,
+		Messages: []zhipuai.ChatCompletionMessage{
 			{
-				Role:    openai.ChatMessageRoleUser,
+				Role:    zhipuai.ChatMessageRoleUser,
 				Content: "Hello!",
 			},
 		},
@@ -293,7 +293,7 @@ func TestCreateChatCompletionStreamErrorWithDataPrefix(t *testing.T) {
 	_, streamErr := stream.Recv()
 	checks.HasError(t, streamErr, "stream.Recv() did not return error")
 
-	var apiErr *openai.APIError
+	var apiErr *zhipuai.APIError
 	if !errors.As(streamErr, &apiErr) {
 		t.Errorf("stream.Recv() did not return APIError")
 	}
@@ -301,7 +301,7 @@ func TestCreateChatCompletionStreamErrorWithDataPrefix(t *testing.T) {
 }
 
 func TestCreateChatCompletionStreamRateLimitError(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/chat/completions", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -317,18 +317,18 @@ func TestCreateChatCompletionStreamRateLimitError(t *testing.T) {
 		_, err := w.Write(dataBytes)
 		checks.NoError(t, err, "Write error")
 	})
-	_, err := client.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
+	_, err := client.CreateChatCompletionStream(context.Background(), zhipuai.ChatCompletionRequest{
 		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
+		Model:     zhipuai.GPT3Dot5Turbo,
+		Messages: []zhipuai.ChatCompletionMessage{
 			{
-				Role:    openai.ChatMessageRoleUser,
+				Role:    zhipuai.ChatMessageRoleUser,
 				Content: "Hello!",
 			},
 		},
 		Stream: true,
 	})
-	var apiErr *openai.APIError
+	var apiErr *zhipuai.APIError
 	if !errors.As(err, &apiErr) {
 		t.Errorf("TestCreateChatCompletionStreamRateLimitError did not return APIError")
 	}
@@ -337,14 +337,14 @@ func TestCreateChatCompletionStreamRateLimitError(t *testing.T) {
 
 func TestAzureCreateChatCompletionStreamRateLimitError(t *testing.T) {
 	wantCode := "429"
-	wantMessage := "Requests to the Creates a completion for the chat message Operation under Azure OpenAI API " +
-		"version 2023-03-15-preview have exceeded token rate limit of your current OpenAI S0 pricing tier. " +
+	wantMessage := "Requests to the Creates a completion for the chat message Operation under Azure zhipuai API " +
+		"version 2023-03-15-preview have exceeded token rate limit of your current zhipuai S0 pricing tier. " +
 		"Please retry after 20 seconds. " +
 		"Please go here: https://aka.ms/oai/quotaincrease if you would like to further increase the default rate limit."
 
 	client, server, teardown := setupAzureTestServer()
 	defer teardown()
-	server.RegisterHandler("/openai/deployments/gpt-35-turbo/chat/completions",
+	server.RegisterHandler("/zhipuai/deployments/gpt-35-turbo/chat/completions",
 		func(w http.ResponseWriter, _ *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusTooManyRequests)
@@ -355,13 +355,13 @@ func TestAzureCreateChatCompletionStreamRateLimitError(t *testing.T) {
 			checks.NoError(t, err, "Write error")
 		})
 
-	apiErr := &openai.APIError{}
-	_, err := client.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
+	apiErr := &zhipuai.APIError{}
+	_, err := client.CreateChatCompletionStream(context.Background(), zhipuai.ChatCompletionRequest{
 		MaxTokens: 5,
-		Model:     openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
+		Model:     zhipuai.GPT3Dot5Turbo,
+		Messages: []zhipuai.ChatCompletionMessage{
 			{
-				Role:    openai.ChatMessageRoleUser,
+				Role:    zhipuai.ChatMessageRoleUser,
 				Content: "Hello!",
 			},
 		},
@@ -387,7 +387,7 @@ func TestAzureCreateChatCompletionStreamRateLimitError(t *testing.T) {
 }
 
 // Helper funcs.
-func compareChatResponses(r1, r2 openai.ChatCompletionStreamResponse) bool {
+func compareChatResponses(r1, r2 zhipuai.ChatCompletionStreamResponse) bool {
 	if r1.ID != r2.ID || r1.Object != r2.Object || r1.Created != r2.Created || r1.Model != r2.Model {
 		return false
 	}
@@ -402,7 +402,7 @@ func compareChatResponses(r1, r2 openai.ChatCompletionStreamResponse) bool {
 	return true
 }
 
-func compareChatStreamResponseChoices(c1, c2 openai.ChatCompletionStreamChoice) bool {
+func compareChatStreamResponseChoices(c1, c2 zhipuai.ChatCompletionStreamChoice) bool {
 	if c1.Index != c2.Index {
 		return false
 	}

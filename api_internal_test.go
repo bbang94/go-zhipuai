@@ -1,11 +1,11 @@
-package openai
+package zhipuai
 
 import (
 	"context"
 	"testing"
 )
 
-func TestOpenAIFullURL(t *testing.T) {
+func TestzhipuaiFullURL(t *testing.T) {
 	cases := []struct {
 		Name   string
 		Suffix string
@@ -14,12 +14,12 @@ func TestOpenAIFullURL(t *testing.T) {
 		{
 			"ChatCompletionsURL",
 			"/chat/completions",
-			"https://api.openai.com/v1/chat/completions",
+			"https://api.zhipuai.com/v1/chat/completions",
 		},
 		{
 			"CompletionsURL",
 			"/completions",
-			"https://api.openai.com/v1/completions",
+			"https://api.zhipuai.com/v1/completions",
 		},
 	}
 
@@ -46,28 +46,28 @@ func TestRequestAuthHeader(t *testing.T) {
 		Expect    string
 	}{
 		{
-			"OpenAIDefault",
+			"zhipuaiDefault",
 			"",
 			"Authorization",
-			"dummy-token-openai",
+			"dummy-token-zhipuai",
 			"",
-			"Bearer dummy-token-openai",
+			"Bearer dummy-token-zhipuai",
 		},
 		{
-			"OpenAIOrg",
-			APITypeOpenAI,
+			"zhipuaiOrg",
+			APITypezhipuai,
 			"Authorization",
-			"dummy-token-openai",
-			"dummy-org-openai",
-			"Bearer dummy-token-openai",
+			"dummy-token-zhipuai",
+			"dummy-org-zhipuai",
+			"Bearer dummy-token-zhipuai",
 		},
 		{
-			"OpenAI",
-			APITypeOpenAI,
+			"zhipuai",
+			APITypezhipuai,
 			"Authorization",
-			"dummy-token-openai",
+			"dummy-token-zhipuai",
 			"",
-			"Bearer dummy-token-openai",
+			"Bearer dummy-token-zhipuai",
 		},
 		{
 			"AzureAD",
@@ -121,7 +121,7 @@ func TestAzureFullURL(t *testing.T) {
 			nil,
 			"chatgpt-demo",
 			"https://httpbin.org/" +
-				"openai/deployments/chatgpt-demo" +
+				"zhipuai/deployments/chatgpt-demo" +
 				"/chat/completions?api-version=2023-05-15",
 		},
 		{
@@ -130,7 +130,7 @@ func TestAzureFullURL(t *testing.T) {
 			nil,
 			"chatgpt-demo",
 			"https://httpbin.org/" +
-				"openai/deployments/chatgpt-demo" +
+				"zhipuai/deployments/chatgpt-demo" +
 				"/chat/completions?api-version=2023-05-15",
 		},
 	}
@@ -139,7 +139,7 @@ func TestAzureFullURL(t *testing.T) {
 		t.Run(c.Name, func(t *testing.T) {
 			az := DefaultAzureConfig("dummy", c.BaseURL)
 			cli := NewClientWithConfig(az)
-			// /openai/deployments/{engine}/chat/completions?api-version={api_version}
+			// /zhipuai/deployments/{engine}/chat/completions?api-version={api_version}
 			actual := cli.fullURL("/chat/completions", c.Model)
 			if actual != c.Expect {
 				t.Errorf("Expected %s, got %s", c.Expect, actual)

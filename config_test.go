@@ -1,9 +1,9 @@
-package openai_test
+package zhipuai_test
 
 import (
 	"testing"
 
-	"github.com/sashabaranov/go-openai"
+	"github.com/bbang94/go-zhipuai"
 )
 
 func TestGetAzureDeploymentByModel(t *testing.T) {
@@ -49,7 +49,7 @@ func TestGetAzureDeploymentByModel(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.Model, func(t *testing.T) {
-			conf := openai.DefaultAzureConfig("", "https://test.openai.azure.com/")
+			conf := zhipuai.DefaultAzureConfig("", "https://test.zhipuai.azure.com/")
 			if c.AzureModelMapperFunc != nil {
 				conf.AzureModelMapperFunc = c.AzureModelMapperFunc
 			}

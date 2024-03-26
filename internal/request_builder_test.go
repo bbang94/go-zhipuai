@@ -1,4 +1,4 @@
-package openai //nolint:testpackage // testing private field
+package zhipuai //nolint:testpackage // testing private field
 
 import (
 	"bytes"

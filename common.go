@@ -1,8 +1,8 @@
-package openai
+package zhipuai
 
-// common.go defines common types used throughout the OpenAI API.
+// common.go defines common types used throughout the zhipuai API.
 
-// Usage Represents the total token usage per request to OpenAI.
+// Usage Represents the total token usage per request to zhipuai.
 type Usage struct {
 	PromptTokens     int `json:"prompt_tokens"`
 	CompletionTokens int `json:"completion_tokens"`

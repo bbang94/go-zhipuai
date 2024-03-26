@@ -1,4 +1,4 @@
-package openai //nolint:testpackage // testing private field
+package zhipuai //nolint:testpackage // testing private field
 
 import (
 	"context"
@@ -7,8 +7,8 @@ import (
 	"os"
 	"testing"
 
-	utils "github.com/sashabaranov/go-openai/internal"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	utils "github.com/bbang94/go-zhipuai/internal"
+	"github.com/bbang94/go-zhipuai/internal/test/checks"
 )
 
 func TestFileBytesUploadWithFailingFormBuilder(t *testing.T) {

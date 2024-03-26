@@ -1,4 +1,4 @@
-package openai
+package zhipuai
 
 import (
 	"context"
@@ -12,8 +12,8 @@ var (
 	ErrCompletionRequestPromptTypeNotSupported = errors.New("the type of CompletionRequest.Prompt only supports string and []string")                              //nolint:lll
 )
 
-// GPT3 Defines the models provided by OpenAI to use when generating
-// completions from OpenAI.
+// GPT3 Defines the models provided by zhipuai to use when generating
+// completions from zhipuai.
 // GPT3 Models are designed for text-based tasks. For code-specific
 // tasks, please refer to the Codex series of models.
 const (
@@ -61,7 +61,7 @@ const (
 	GPT3Babbage002        = "babbage-002"
 )
 
-// Codex Defines the models provided by OpenAI.
+// Codex Defines the models provided by zhipuai.
 // These models are designed for code-specific tasks, and use
 // a different tokenizer which optimizes for whitespace.
 const (
@@ -137,7 +137,7 @@ type CompletionRequest struct {
 	BestOf           int      `json:"best_of,omitempty"`
 	// LogitBias is must be a token id string (specified by their token ID in the tokenizer), not a word string.
 	// incorrect: `"logit_bias":{"You": 6}`, correct: `"logit_bias":{"1639": 6}`
-	// refs: https://platform.openai.com/docs/api-reference/completions/create#completions/create-logit_bias
+	// refs: https://platform.zhipuai.com/docs/api-reference/completions/create#completions/create-logit_bias
 	LogitBias map[string]int `json:"logit_bias,omitempty"`
 	User      string         `json:"user,omitempty"`
 }

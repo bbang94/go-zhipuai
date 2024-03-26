@@ -1,10 +1,10 @@
-package openai_test
+package zhipuai_test
 
 import (
 	"context"
 
-	openai "github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	zhipuai "github.com/bbang94/go-zhipuai"
+	"github.com/bbang94/go-zhipuai/internal/test/checks"
 
 	"encoding/json"
 	"fmt"
@@ -25,14 +25,14 @@ When asked a question, write and run Python code to answer the question.`
 	after := "asst_abc122"
 	before := "asst_abc124"
 
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 
 	server.RegisterHandler(
 		"/v1/assistants/"+assistantID+"/files/"+assistantFileID,
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodGet {
-				resBytes, _ := json.Marshal(openai.AssistantFile{
+				resBytes, _ := json.Marshal(zhipuai.AssistantFile{
 					ID:          assistantFileID,
 					Object:      "assistant.file",
 					CreatedAt:   1234567890,
@@ -53,8 +53,8 @@ When asked a question, write and run Python code to answer the question.`
 		"/v1/assistants/"+assistantID+"/files",
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodGet {
-				resBytes, _ := json.Marshal(openai.AssistantFilesList{
-					AssistantFiles: []openai.AssistantFile{
+				resBytes, _ := json.Marshal(zhipuai.AssistantFilesList{
+					AssistantFiles: []zhipuai.AssistantFile{
 						{
 							ID:          assistantFileID,
 							Object:      "assistant.file",
@@ -65,11 +65,11 @@ When asked a question, write and run Python code to answer the question.`
 				})
 				fmt.Fprintln(w, string(resBytes))
 			} else if r.Method == http.MethodPost {
-				var request openai.AssistantFileRequest
+				var request zhipuai.AssistantFileRequest
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.AssistantFile{
+				resBytes, _ := json.Marshal(zhipuai.AssistantFile{
 					ID:          request.FileID,
 					Object:      "assistant.file",
 					CreatedAt:   1234567890,
@@ -85,22 +85,22 @@ When asked a question, write and run Python code to answer the question.`
 		func(w http.ResponseWriter, r *http.Request) {
 			switch r.Method {
 			case http.MethodGet:
-				resBytes, _ := json.Marshal(openai.Assistant{
+				resBytes, _ := json.Marshal(zhipuai.Assistant{
 					ID:           assistantID,
 					Object:       "assistant",
 					CreatedAt:    1234567890,
 					Name:         &assistantName,
-					Model:        openai.GPT4TurboPreview,
+					Model:        zhipuai.GPT4TurboPreview,
 					Description:  &assistantDescription,
 					Instructions: &assistantInstructions,
 				})
 				fmt.Fprintln(w, string(resBytes))
 			case http.MethodPost:
-				var request openai.Assistant
+				var request zhipuai.Assistant
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.Assistant{
+				resBytes, _ := json.Marshal(zhipuai.Assistant{
 					ID:           assistantID,
 					Object:       "assistant",
 					CreatedAt:    1234567890,
@@ -125,11 +125,11 @@ When asked a question, write and run Python code to answer the question.`
 		"/v1/assistants",
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodPost {
-				var request openai.AssistantRequest
+				var request zhipuai.AssistantRequest
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.Assistant{
+				resBytes, _ := json.Marshal(zhipuai.Assistant{
 					ID:           assistantID,
 					Object:       "assistant",
 					CreatedAt:    1234567890,
@@ -141,16 +141,16 @@ When asked a question, write and run Python code to answer the question.`
 				})
 				fmt.Fprintln(w, string(resBytes))
 			} else if r.Method == http.MethodGet {
-				resBytes, _ := json.Marshal(openai.AssistantsList{
+				resBytes, _ := json.Marshal(zhipuai.AssistantsList{
 					LastID:  &assistantID,
 					FirstID: &assistantID,
-					Assistants: []openai.Assistant{
+					Assistants: []zhipuai.Assistant{
 						{
 							ID:           assistantID,
 							Object:       "assistant",
 							CreatedAt:    1234567890,
 							Name:         &assistantName,
-							Model:        openai.GPT4TurboPreview,
+							Model:        zhipuai.GPT4TurboPreview,
 							Description:  &assistantDescription,
 							Instructions: &assistantInstructions,
 						},
@@ -164,10 +164,10 @@ When asked a question, write and run Python code to answer the question.`
 	ctx := context.Background()
 
 	t.Run("create_assistant", func(t *testing.T) {
-		_, err := client.CreateAssistant(ctx, openai.AssistantRequest{
+		_, err := client.CreateAssistant(ctx, zhipuai.AssistantRequest{
 			Name:         &assistantName,
 			Description:  &assistantDescription,
-			Model:        openai.GPT4TurboPreview,
+			Model:        zhipuai.GPT4TurboPreview,
 			Instructions: &assistantInstructions,
 		})
 		checks.NoError(t, err, "CreateAssistant error")
@@ -189,7 +189,7 @@ When asked a question, write and run Python code to answer the question.`
 	})
 
 	t.Run("create_assistant_file", func(t *testing.T) {
-		_, err := client.CreateAssistantFile(ctx, assistantID, openai.AssistantFileRequest{
+		_, err := client.CreateAssistantFile(ctx, assistantID, zhipuai.AssistantFileRequest{
 			FileID: assistantFileID,
 		})
 		checks.NoError(t, err, "CreateAssistantFile error")
@@ -211,10 +211,10 @@ When asked a question, write and run Python code to answer the question.`
 	})
 
 	t.Run("modify_assistant_no_tools", func(t *testing.T) {
-		assistant, err := client.ModifyAssistant(ctx, assistantID, openai.AssistantRequest{
+		assistant, err := client.ModifyAssistant(ctx, assistantID, zhipuai.AssistantRequest{
 			Name:         &assistantName,
 			Description:  &assistantDescription,
-			Model:        openai.GPT4TurboPreview,
+			Model:        zhipuai.GPT4TurboPreview,
 			Instructions: &assistantInstructions,
 		})
 		checks.NoError(t, err, "ModifyAssistant error")
@@ -225,12 +225,12 @@ When asked a question, write and run Python code to answer the question.`
 	})
 
 	t.Run("modify_assistant_with_tools", func(t *testing.T) {
-		assistant, err := client.ModifyAssistant(ctx, assistantID, openai.AssistantRequest{
+		assistant, err := client.ModifyAssistant(ctx, assistantID, zhipuai.AssistantRequest{
 			Name:         &assistantName,
 			Description:  &assistantDescription,
-			Model:        openai.GPT4TurboPreview,
+			Model:        zhipuai.GPT4TurboPreview,
 			Instructions: &assistantInstructions,
-			Tools:        []openai.AssistantTool{{Type: openai.AssistantToolTypeFunction}},
+			Tools:        []zhipuai.AssistantTool{{Type: zhipuai.AssistantToolTypeFunction}},
 		})
 		checks.NoError(t, err, "ModifyAssistant error")
 
@@ -240,12 +240,12 @@ When asked a question, write and run Python code to answer the question.`
 	})
 
 	t.Run("modify_assistant_empty_tools", func(t *testing.T) {
-		assistant, err := client.ModifyAssistant(ctx, assistantID, openai.AssistantRequest{
+		assistant, err := client.ModifyAssistant(ctx, assistantID, zhipuai.AssistantRequest{
 			Name:         &assistantName,
 			Description:  &assistantDescription,
-			Model:        openai.GPT4TurboPreview,
+			Model:        zhipuai.GPT4TurboPreview,
 			Instructions: &assistantInstructions,
-			Tools:        make([]openai.AssistantTool, 0),
+			Tools:        make([]zhipuai.AssistantTool, 0),
 		})
 
 		checks.NoError(t, err, "ModifyAssistant error")
@@ -272,10 +272,10 @@ When asked a question, write and run Python code to answer the question.`
 	defer teardown()
 
 	server.RegisterHandler(
-		"/openai/assistants/"+assistantID+"/files/"+assistantFileID,
+		"/zhipuai/assistants/"+assistantID+"/files/"+assistantFileID,
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodGet {
-				resBytes, _ := json.Marshal(openai.AssistantFile{
+				resBytes, _ := json.Marshal(zhipuai.AssistantFile{
 					ID:          assistantFileID,
 					Object:      "assistant.file",
 					CreatedAt:   1234567890,
@@ -293,11 +293,11 @@ When asked a question, write and run Python code to answer the question.`
 	)
 
 	server.RegisterHandler(
-		"/openai/assistants/"+assistantID+"/files",
+		"/zhipuai/assistants/"+assistantID+"/files",
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodGet {
-				resBytes, _ := json.Marshal(openai.AssistantFilesList{
-					AssistantFiles: []openai.AssistantFile{
+				resBytes, _ := json.Marshal(zhipuai.AssistantFilesList{
+					AssistantFiles: []zhipuai.AssistantFile{
 						{
 							ID:          assistantFileID,
 							Object:      "assistant.file",
@@ -308,11 +308,11 @@ When asked a question, write and run Python code to answer the question.`
 				})
 				fmt.Fprintln(w, string(resBytes))
 			} else if r.Method == http.MethodPost {
-				var request openai.AssistantFileRequest
+				var request zhipuai.AssistantFileRequest
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.AssistantFile{
+				resBytes, _ := json.Marshal(zhipuai.AssistantFile{
 					ID:          request.FileID,
 					Object:      "assistant.file",
 					CreatedAt:   1234567890,
@@ -324,26 +324,26 @@ When asked a question, write and run Python code to answer the question.`
 	)
 
 	server.RegisterHandler(
-		"/openai/assistants/"+assistantID,
+		"/zhipuai/assistants/"+assistantID,
 		func(w http.ResponseWriter, r *http.Request) {
 			switch r.Method {
 			case http.MethodGet:
-				resBytes, _ := json.Marshal(openai.Assistant{
+				resBytes, _ := json.Marshal(zhipuai.Assistant{
 					ID:           assistantID,
 					Object:       "assistant",
 					CreatedAt:    1234567890,
 					Name:         &assistantName,
-					Model:        openai.GPT4TurboPreview,
+					Model:        zhipuai.GPT4TurboPreview,
 					Description:  &assistantDescription,
 					Instructions: &assistantInstructions,
 				})
 				fmt.Fprintln(w, string(resBytes))
 			case http.MethodPost:
-				var request openai.AssistantRequest
+				var request zhipuai.AssistantRequest
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.Assistant{
+				resBytes, _ := json.Marshal(zhipuai.Assistant{
 					ID:           assistantID,
 					Object:       "assistant",
 					CreatedAt:    1234567890,
@@ -365,14 +365,14 @@ When asked a question, write and run Python code to answer the question.`
 	)
 
 	server.RegisterHandler(
-		"/openai/assistants",
+		"/zhipuai/assistants",
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodPost {
-				var request openai.AssistantRequest
+				var request zhipuai.AssistantRequest
 				err := json.NewDecoder(r.Body).Decode(&request)
 				checks.NoError(t, err, "Decode error")
 
-				resBytes, _ := json.Marshal(openai.Assistant{
+				resBytes, _ := json.Marshal(zhipuai.Assistant{
 					ID:           assistantID,
 					Object:       "assistant",
 					CreatedAt:    1234567890,
@@ -384,16 +384,16 @@ When asked a question, write and run Python code to answer the question.`
 				})
 				fmt.Fprintln(w, string(resBytes))
 			} else if r.Method == http.MethodGet {
-				resBytes, _ := json.Marshal(openai.AssistantsList{
+				resBytes, _ := json.Marshal(zhipuai.AssistantsList{
 					LastID:  &assistantID,
 					FirstID: &assistantID,
-					Assistants: []openai.Assistant{
+					Assistants: []zhipuai.Assistant{
 						{
 							ID:           assistantID,
 							Object:       "assistant",
 							CreatedAt:    1234567890,
 							Name:         &assistantName,
-							Model:        openai.GPT4TurboPreview,
+							Model:        zhipuai.GPT4TurboPreview,
 							Description:  &assistantDescription,
 							Instructions: &assistantInstructions,
 						},
@@ -406,10 +406,10 @@ When asked a question, write and run Python code to answer the question.`
 
 	ctx := context.Background()
 
-	_, err := client.CreateAssistant(ctx, openai.AssistantRequest{
+	_, err := client.CreateAssistant(ctx, zhipuai.AssistantRequest{
 		Name:         &assistantName,
 		Description:  &assistantDescription,
-		Model:        openai.GPT4TurboPreview,
+		Model:        zhipuai.GPT4TurboPreview,
 		Instructions: &assistantInstructions,
 	})
 	checks.NoError(t, err, "CreateAssistant error")
@@ -417,10 +417,10 @@ When asked a question, write and run Python code to answer the question.`
 	_, err = client.RetrieveAssistant(ctx, assistantID)
 	checks.NoError(t, err, "RetrieveAssistant error")
 
-	_, err = client.ModifyAssistant(ctx, assistantID, openai.AssistantRequest{
+	_, err = client.ModifyAssistant(ctx, assistantID, zhipuai.AssistantRequest{
 		Name:         &assistantName,
 		Description:  &assistantDescription,
-		Model:        openai.GPT4TurboPreview,
+		Model:        zhipuai.GPT4TurboPreview,
 		Instructions: &assistantInstructions,
 	})
 	checks.NoError(t, err, "ModifyAssistant error")
@@ -431,7 +431,7 @@ When asked a question, write and run Python code to answer the question.`
 	_, err = client.ListAssistants(ctx, &limit, &order, &after, &before)
 	checks.NoError(t, err, "ListAssistants error")
 
-	_, err = client.CreateAssistantFile(ctx, assistantID, openai.AssistantFileRequest{
+	_, err = client.CreateAssistantFile(ctx, assistantID, zhipuai.AssistantFileRequest{
 		FileID: assistantFileID,
 	})
 	checks.NoError(t, err, "CreateAssistantFile error")

@@ -1,4 +1,4 @@
-package openai_test
+package zhipuai_test
 
 import (
 	"context"
@@ -11,13 +11,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/bbang94/go-zhipuai"
+	"github.com/bbang94/go-zhipuai/internal/test"
+	"github.com/bbang94/go-zhipuai/internal/test/checks"
 )
 
 func TestSpeechIntegration(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 
 	server.RegisterHandler("/v1/audio/speech", func(w http.ResponseWriter, r *http.Request) {
@@ -80,10 +80,10 @@ func TestSpeechIntegration(t *testing.T) {
 	})
 
 	t.Run("happy path", func(t *testing.T) {
-		res, err := client.CreateSpeech(context.Background(), openai.CreateSpeechRequest{
-			Model: openai.TTSModel1,
+		res, err := client.CreateSpeech(context.Background(), zhipuai.CreateSpeechRequest{
+			Model: zhipuai.TTSModel1,
 			Input: "Hello!",
-			Voice: openai.VoiceAlloy,
+			Voice: zhipuai.VoiceAlloy,
 		})
 		checks.NoError(t, err, "CreateSpeech error")
 		defer res.Close()
@@ -96,20 +96,20 @@ func TestSpeechIntegration(t *testing.T) {
 		checks.NoError(t, err, "Create error")
 	})
 	t.Run("invalid model", func(t *testing.T) {
-		_, err := client.CreateSpeech(context.Background(), openai.CreateSpeechRequest{
+		_, err := client.CreateSpeech(context.Background(), zhipuai.CreateSpeechRequest{
 			Model: "invalid_model",
 			Input: "Hello!",
-			Voice: openai.VoiceAlloy,
+			Voice: zhipuai.VoiceAlloy,
 		})
-		checks.ErrorIs(t, err, openai.ErrInvalidSpeechModel, "CreateSpeech error")
+		checks.ErrorIs(t, err, zhipuai.ErrInvalidSpeechModel, "CreateSpeech error")
 	})
 
 	t.Run("invalid voice", func(t *testing.T) {
-		_, err := client.CreateSpeech(context.Background(), openai.CreateSpeechRequest{
-			Model: openai.TTSModel1,
+		_, err := client.CreateSpeech(context.Background(), zhipuai.CreateSpeechRequest{
+			Model: zhipuai.TTSModel1,
 			Input: "Hello!",
 			Voice: "invalid_voice",
 		})
-		checks.ErrorIs(t, err, openai.ErrInvalidVoice, "CreateSpeech error")
+		checks.ErrorIs(t, err, zhipuai.ErrInvalidVoice, "CreateSpeech error")
 	})
 }

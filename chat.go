@@ -1,4 +1,4 @@
-package openai
+package zhipuai
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-// Chat message role defined by the OpenAI API.
+// Chat message role defined by the zhipuai API.
 const (
 	ChatMessageRoleSystem    = "system"
 	ChatMessageRoleUser      = "user"
@@ -86,8 +86,8 @@ type ChatCompletionMessage struct {
 
 	// This property isn't in the official documentation, but it's in
 	// the documentation for the official library for python:
-	// - https://github.com/openai/openai-python/blob/main/chatml.md
-	// - https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
+	// - https://github.com/zhipuai/zhipuai-python/blob/main/chatml.md
+	// - https://github.com/zhipuai/zhipuai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
 	Name string `json:"name,omitempty"`
 
 	FunctionCall *FunctionCall `json:"function_call,omitempty"`
@@ -198,7 +198,7 @@ type ChatCompletionRequest struct {
 	FrequencyPenalty float32                       `json:"frequency_penalty,omitempty"`
 	// LogitBias is must be a token id string (specified by their token ID in the tokenizer), not a word string.
 	// incorrect: `"logit_bias":{"You": 6}`, correct: `"logit_bias":{"1639": 6}`
-	// refs: https://platform.openai.com/docs/api-reference/chat/create#chat/create-logit_bias
+	// refs: https://platform.zhipuai.com/docs/api-reference/chat/create#chat/create-logit_bias
 	LogitBias map[string]int `json:"logit_bias,omitempty"`
 	// LogProbs indicates whether to return log probabilities of the output tokens or not.
 	// If true, returns the log probabilities of each output token returned in the content of message.

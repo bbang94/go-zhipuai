@@ -1,4 +1,4 @@
-package openai_test
+package zhipuai_test
 
 import (
 	"context"
@@ -10,22 +10,22 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/bbang94/go-zhipuai"
+	"github.com/bbang94/go-zhipuai/internal/test/checks"
 )
 
 func TestImages(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/images/generations", handleImageEndpoint)
-	_, err := client.CreateImage(context.Background(), openai.ImageRequest{
+	_, err := client.CreateImage(context.Background(), zhipuai.ImageRequest{
 		Prompt:         "Lorem ipsum",
-		Model:          openai.CreateImageModelDallE3,
+		Model:          zhipuai.CreateImageModelDallE3,
 		N:              1,
-		Quality:        openai.CreateImageQualityHD,
-		Size:           openai.CreateImageSize1024x1024,
-		Style:          openai.CreateImageStyleVivid,
-		ResponseFormat: openai.CreateImageResponseFormatURL,
+		Quality:        zhipuai.CreateImageQualityHD,
+		Size:           zhipuai.CreateImageSize1024x1024,
+		Style:          zhipuai.CreateImageStyleVivid,
+		ResponseFormat: zhipuai.CreateImageResponseFormatURL,
 		User:           "user",
 	})
 	checks.NoError(t, err, "CreateImage error")
@@ -40,20 +40,20 @@ func handleImageEndpoint(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
-	var imageReq openai.ImageRequest
+	var imageReq zhipuai.ImageRequest
 	if imageReq, err = getImageBody(r); err != nil {
 		http.Error(w, "could not read request", http.StatusInternalServerError)
 		return
 	}
-	res := openai.ImageResponse{
+	res := zhipuai.ImageResponse{
 		Created: time.Now().Unix(),
 	}
 	for i := 0; i < imageReq.N; i++ {
-		imageData := openai.ImageResponseDataInner{}
+		imageData := zhipuai.ImageResponseDataInner{}
 		switch imageReq.ResponseFormat {
-		case openai.CreateImageResponseFormatURL, "":
+		case zhipuai.CreateImageResponseFormatURL, "":
 			imageData.URL = "https://example.com/image.png"
-		case openai.CreateImageResponseFormatB64JSON:
+		case zhipuai.CreateImageResponseFormatB64JSON:
 			// This decodes to "{}" in base64.
 			imageData.B64JSON = "e30K"
 		default:
@@ -67,22 +67,22 @@ func handleImageEndpoint(w http.ResponseWriter, r *http.Request) {
 }
 
 // getImageBody Returns the body of the request to create a image.
-func getImageBody(r *http.Request) (openai.ImageRequest, error) {
-	image := openai.ImageRequest{}
+func getImageBody(r *http.Request) (zhipuai.ImageRequest, error) {
+	image := zhipuai.ImageRequest{}
 	// read the request body
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
-		return openai.ImageRequest{}, err
+		return zhipuai.ImageRequest{}, err
 	}
 	err = json.Unmarshal(reqBody, &image)
 	if err != nil {
-		return openai.ImageRequest{}, err
+		return zhipuai.ImageRequest{}, err
 	}
 	return image, nil
 }
 
 func TestImageEdit(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/images/edits", handleEditImageEndpoint)
 
@@ -105,19 +105,19 @@ func TestImageEdit(t *testing.T) {
 		os.Remove("image.png")
 	}()
 
-	_, err = client.CreateEditImage(context.Background(), openai.ImageEditRequest{
+	_, err = client.CreateEditImage(context.Background(), zhipuai.ImageEditRequest{
 		Image:          origin,
 		Mask:           mask,
 		Prompt:         "There is a turtle in the pool",
 		N:              3,
-		Size:           openai.CreateImageSize1024x1024,
-		ResponseFormat: openai.CreateImageResponseFormatURL,
+		Size:           zhipuai.CreateImageSize1024x1024,
+		ResponseFormat: zhipuai.CreateImageResponseFormatURL,
 	})
 	checks.NoError(t, err, "CreateImage error")
 }
 
 func TestImageEditWithoutMask(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/images/edits", handleEditImageEndpoint)
 
@@ -132,12 +132,12 @@ func TestImageEditWithoutMask(t *testing.T) {
 		os.Remove("image.png")
 	}()
 
-	_, err = client.CreateEditImage(context.Background(), openai.ImageEditRequest{
+	_, err = client.CreateEditImage(context.Background(), zhipuai.ImageEditRequest{
 		Image:          origin,
 		Prompt:         "There is a turtle in the pool",
 		N:              3,
-		Size:           openai.CreateImageSize1024x1024,
-		ResponseFormat: openai.CreateImageResponseFormatURL,
+		Size:           zhipuai.CreateImageSize1024x1024,
+		ResponseFormat: zhipuai.CreateImageResponseFormatURL,
 	})
 	checks.NoError(t, err, "CreateImage error")
 }
@@ -151,9 +151,9 @@ func handleEditImageEndpoint(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 
-	responses := openai.ImageResponse{
+	responses := zhipuai.ImageResponse{
 		Created: time.Now().Unix(),
-		Data: []openai.ImageResponseDataInner{
+		Data: []zhipuai.ImageResponseDataInner{
 			{
 				URL:     "test-url1",
 				B64JSON: "",
@@ -174,7 +174,7 @@ func handleEditImageEndpoint(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestImageVariation(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/images/variations", handleVariateImageEndpoint)
 
@@ -189,11 +189,11 @@ func TestImageVariation(t *testing.T) {
 		os.Remove("image.png")
 	}()
 
-	_, err = client.CreateVariImage(context.Background(), openai.ImageVariRequest{
+	_, err = client.CreateVariImage(context.Background(), zhipuai.ImageVariRequest{
 		Image:          origin,
 		N:              3,
-		Size:           openai.CreateImageSize1024x1024,
-		ResponseFormat: openai.CreateImageResponseFormatURL,
+		Size:           zhipuai.CreateImageSize1024x1024,
+		ResponseFormat: zhipuai.CreateImageResponseFormatURL,
 	})
 	checks.NoError(t, err, "CreateImage error")
 }
@@ -207,9 +207,9 @@ func handleVariateImageEndpoint(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 
-	responses := openai.ImageResponse{
+	responses := zhipuai.ImageResponse{
 		Created: time.Now().Unix(),
-		Data: []openai.ImageResponseDataInner{
+		Data: []zhipuai.ImageResponseDataInner{
 			{
 				URL:     "test-url1",
 				B64JSON: "",

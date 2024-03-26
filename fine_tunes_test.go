@@ -1,4 +1,4 @@
-package openai_test
+package zhipuai_test
 
 import (
 	"context"
@@ -7,24 +7,24 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/bbang94/go-zhipuai"
+	"github.com/bbang94/go-zhipuai/internal/test/checks"
 )
 
 const testFineTuneID = "fine-tune-id"
 
 // TestFineTunes Tests the fine tunes endpoint of the API using the mocked server.
 func TestFineTunes(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler(
 		"/v1/fine-tunes",
 		func(w http.ResponseWriter, r *http.Request) {
 			var resBytes []byte
 			if r.Method == http.MethodGet {
-				resBytes, _ = json.Marshal(openai.FineTuneList{})
+				resBytes, _ = json.Marshal(zhipuai.FineTuneList{})
 			} else {
-				resBytes, _ = json.Marshal(openai.FineTune{})
+				resBytes, _ = json.Marshal(zhipuai.FineTune{})
 			}
 			fmt.Fprintln(w, string(resBytes))
 		},
@@ -33,7 +33,7 @@ func TestFineTunes(t *testing.T) {
 	server.RegisterHandler(
 		"/v1/fine-tunes/"+testFineTuneID+"/cancel",
 		func(w http.ResponseWriter, _ *http.Request) {
-			resBytes, _ := json.Marshal(openai.FineTune{})
+			resBytes, _ := json.Marshal(zhipuai.FineTune{})
 			fmt.Fprintln(w, string(resBytes))
 		},
 	)
@@ -43,9 +43,9 @@ func TestFineTunes(t *testing.T) {
 		func(w http.ResponseWriter, r *http.Request) {
 			var resBytes []byte
 			if r.Method == http.MethodDelete {
-				resBytes, _ = json.Marshal(openai.FineTuneDeleteResponse{})
+				resBytes, _ = json.Marshal(zhipuai.FineTuneDeleteResponse{})
 			} else {
-				resBytes, _ = json.Marshal(openai.FineTune{})
+				resBytes, _ = json.Marshal(zhipuai.FineTune{})
 			}
 			fmt.Fprintln(w, string(resBytes))
 		},
@@ -54,7 +54,7 @@ func TestFineTunes(t *testing.T) {
 	server.RegisterHandler(
 		"/v1/fine-tunes/"+testFineTuneID+"/events",
 		func(w http.ResponseWriter, _ *http.Request) {
-			resBytes, _ := json.Marshal(openai.FineTuneEventList{})
+			resBytes, _ := json.Marshal(zhipuai.FineTuneEventList{})
 			fmt.Fprintln(w, string(resBytes))
 		},
 	)
@@ -64,7 +64,7 @@ func TestFineTunes(t *testing.T) {
 	_, err := client.ListFineTunes(ctx)
 	checks.NoError(t, err, "ListFineTunes error")
 
-	_, err = client.CreateFineTune(ctx, openai.FineTuneRequest{})
+	_, err = client.CreateFineTune(ctx, zhipuai.FineTuneRequest{})
 	checks.NoError(t, err, "CreateFineTune error")
 
 	_, err = client.CancelFineTune(ctx, testFineTuneID)

@@ -1,4 +1,4 @@
-package openai_test
+package zhipuai_test
 
 import (
 	"bytes"
@@ -12,21 +12,21 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/internal/test"
-	"github.com/sashabaranov/go-openai/internal/test/checks"
+	"github.com/bbang94/go-zhipuai"
+	"github.com/bbang94/go-zhipuai/internal/test"
+	"github.com/bbang94/go-zhipuai/internal/test/checks"
 )
 
 // TestAudio Tests the transcription and translation endpoints of the API using the mocked server.
 func TestAudio(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/audio/transcriptions", handleAudioEndpoint)
 	server.RegisterHandler("/v1/audio/translations", handleAudioEndpoint)
 
 	testcases := []struct {
 		name     string
-		createFn func(context.Context, openai.AudioRequest) (openai.AudioResponse, error)
+		createFn func(context.Context, zhipuai.AudioRequest) (zhipuai.AudioResponse, error)
 	}{
 		{
 			"transcribe",
@@ -48,7 +48,7 @@ func TestAudio(t *testing.T) {
 			path := filepath.Join(dir, "fake.mp3")
 			test.CreateTestFile(t, path)
 
-			req := openai.AudioRequest{
+			req := zhipuai.AudioRequest{
 				FilePath: path,
 				Model:    "whisper-3",
 			}
@@ -57,7 +57,7 @@ func TestAudio(t *testing.T) {
 		})
 
 		t.Run(tc.name+" (with reader)", func(t *testing.T) {
-			req := openai.AudioRequest{
+			req := zhipuai.AudioRequest{
 				FilePath: "fake.webm",
 				Reader:   bytes.NewBuffer([]byte(`some webm binary data`)),
 				Model:    "whisper-3",
@@ -69,14 +69,14 @@ func TestAudio(t *testing.T) {
 }
 
 func TestAudioWithOptionalArgs(t *testing.T) {
-	client, server, teardown := setupOpenAITestServer()
+	client, server, teardown := setupzhipuaiTestServer()
 	defer teardown()
 	server.RegisterHandler("/v1/audio/transcriptions", handleAudioEndpoint)
 	server.RegisterHandler("/v1/audio/translations", handleAudioEndpoint)
 
 	testcases := []struct {
 		name     string
-		createFn func(context.Context, openai.AudioRequest) (openai.AudioResponse, error)
+		createFn func(context.Context, zhipuai.AudioRequest) (zhipuai.AudioResponse, error)
 	}{
 		{
 			"transcribe",
@@ -98,13 +98,13 @@ func TestAudioWithOptionalArgs(t *testing.T) {
 			path := filepath.Join(dir, "fake.mp3")
 			test.CreateTestFile(t, path)
 
-			req := openai.AudioRequest{
+			req := zhipuai.AudioRequest{
 				FilePath:    path,
 				Model:       "whisper-3",
 				Prompt:      "用简体中文",
 				Temperature: 0.5,
 				Language:    "zh",
-				Format:      openai.AudioResponseFormatSRT,
+				Format:      zhipuai.AudioResponseFormatSRT,
 			}
 			_, err := tc.createFn(ctx, req)
 			checks.NoError(t, err, "audio API error")

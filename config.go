@@ -1,4 +1,4 @@
-package openai
+package zhipuai
 
 import (
 	"net/http"
@@ -6,17 +6,17 @@ import (
 )
 
 const (
-	openaiAPIURLv1                 = "https://open.bigmodel.cn/api/paas/v4"
+	zhipuaiAPIURLv1                = "https://open.bigmodel.cn/api/paas/v4"
 	defaultEmptyMessagesLimit uint = 300
 
-	azureAPIPrefix         = "openai"
+	azureAPIPrefix         = "zhipuai"
 	azureDeploymentsPrefix = "deployments"
 )
 
 type APIType string
 
 const (
-	APITypeOpenAI  APIType = "OPEN_AI"
+	APITypezhipuai APIType = "OPEN_AI"
 	APITypeAzure   APIType = "AZURE"
 	APITypeAzureAD APIType = "AZURE_AD"
 )
@@ -40,8 +40,8 @@ type ClientConfig struct {
 func DefaultConfig(authToken string) ClientConfig {
 	return ClientConfig{
 		authToken: authToken,
-		BaseURL:   openaiAPIURLv1,
-		APIType:   APITypeOpenAI,
+		BaseURL:   zhipuaiAPIURLv1,
+		APIType:   APITypezhipuai,
 		OrgID:     "",
 
 		HTTPClient: &http.Client{},
@@ -68,7 +68,7 @@ func DefaultAzureConfig(apiKey, baseURL string) ClientConfig {
 }
 
 func (ClientConfig) String() string {
-	return "<OpenAI API ClientConfig>"
+	return "<zhipuai API ClientConfig>"
 }
 
 func (c ClientConfig) GetAzureDeploymentByModel(model string) string {
